@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/myhead.jpeg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="今天我们来聊聊 Solidity 中的 revert()，assert()，与 require() 函数，这三个函数都是在函数执行过程中与错误处理有关的函数。 早期版本的错误处理 throw在早期的 Solidity 版本中，如果程序执行过程中遇到了错误，会使用到 throw() 函数 123456789101112131415161718pragma solidity ^0.6.0;contra">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Solidity中的revert()，assert()与require()">
+<meta property="og:url" content="http://yoursite.com/2020/05/17/Solidity%E4%B8%AD%E7%9A%84revert-%EF%BC%8Cassert-%E4%B8%8Erequire/index.html">
+<meta property="og:site_name" content="PolarSpace">
+<meta property="og:description" content="今天我们来聊聊 Solidity 中的 revert()，assert()，与 require() 函数，这三个函数都是在函数执行过程中与错误处理有关的函数。 早期版本的错误处理 throw在早期的 Solidity 版本中，如果程序执行过程中遇到了错误，会使用到 throw() 函数 123456789101112131415161718pragma solidity ^0.6.0;contra">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517154846.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517161847.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517154944.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517161913.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517165103.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517165145.png">
+<meta property="article:published_time" content="2020-05-17T07:28:00.000Z">
+<meta property="article:modified_time" content="2020-05-17T08:52:55.910Z">
+<meta property="article:author" content="PolarSpace">
+<meta property="article:tag" content="Solidity">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517154846.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/05/17/Solidity%E4%B8%AD%E7%9A%84revert-%EF%BC%8Cassert-%E4%B8%8Erequire/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Solidity中的revert()，assert()与require() | PolarSpace</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">PolarSpace</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">极</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/17/Solidity%E4%B8%AD%E7%9A%84revert-%EF%BC%8Cassert-%E4%B8%8Erequire/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/myhead.jpeg">
+      <meta itemprop="name" content="PolarSpace">
+      <meta itemprop="description" content="登峰造极境">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="PolarSpace">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Solidity中的revert()，assert()与require()
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-17 15:28:00 / 修改时间：16:52:55" itemprop="dateCreated datePublished" datetime="2020-05-17T15:28:00+08:00">2020-05-17</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>今天我们来聊聊 Solidity 中的 revert()，assert()，与 require() 函数，这三个函数都是在函数执行过程中与错误处理有关的函数。</p>
+<h3 id="早期版本的错误处理-throw"><a href="#早期版本的错误处理-throw" class="headerlink" title="早期版本的错误处理 throw"></a>早期版本的错误处理 throw</h3><p>在早期的 Solidity 版本中，如果程序执行过程中遇到了错误，会使用到 throw() 函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity ^0.6.0;</span><br><span class="line"></span><br><span class="line">contract MyOwner &#123;</span><br><span class="line"></span><br><span class="line">    address public owner;</span><br><span class="line"></span><br><span class="line">    constructor() public &#123;</span><br><span class="line">        owner &#x3D; msg.sender;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    function testOwner() public &#123;</span><br><span class="line">        if (msg.sender !&#x3D; owner) &#123;</span><br><span class="line">            &#x2F;&#x2F; 已经废弃</span><br><span class="line">            throw();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<p>在执行 testOwner 方法时，如果调用者不是 owner，那么会返回 invalid opcode 错误，回退所有的状态改变，并且用尽所有的 gas。throw() 函数目前已经被移除了，现在主要使用的就是我们今天的主角，revert()，assert() 与 require()。</p>
+<p>上面的 throw() 处理方法，如果用这三个函数处理的话，就是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if (msg.sender !&#x3D; owner) revert();</span><br><span class="line"></span><br><span class="line">require(msg.sender &#x3D;&#x3D; owner);</span><br><span class="line"></span><br><span class="line">assert(msg.sender &#x3D;&#x3D; owner);</span><br></pre></td></tr></table></figure>
+
+<h3 id="require-与-assert"><a href="#require-与-assert" class="headerlink" title="require 与 assert"></a>require 与 assert</h3><p>两者最重要的一点就是，如果 require() 函数内的条件不满足，会返回剩余的 gas，而 assert() 会用尽所有的 gas，我们来实践一下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity ^0.6.0;</span><br><span class="line"></span><br><span class="line">contract ErrorHandle &#123;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 这两个函数没有任何实际意义，我们只是用来测试而已</span><br><span class="line">    function testRequire(uint x) public pure &#123;</span><br><span class="line">        require(x &gt; 10);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    function testAssert(uint x) public pure &#123;</span><br><span class="line">        assert(x &gt; 10);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 Remix 中，部署合约，并分别调用两个函数，由于他们的条件是 x &gt; 10，因此，我们随便传入一个小于等于 10 的参数即可。</p>
+<p>require() 的执行结果：</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517154846.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517161847.png" alt=""></p>
+<p>assert() 的执行结果：</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517154944.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517161913.png" alt=""></p>
+<p>可以看到 require() 只用到很少的 gas，而assert() 已经全部用尽的 gas，如果对这里的 transaction cost 和 execution cost 的有疑惑的话，可以看看我的另一篇文章： <a href="/2020/05/17/%E6%B7%B1%E7%A9%B6Solidity%E4%B8%AD%E7%9A%84gas%E8%8A%B1%E8%B4%B9/" title="深究Solidity中的gas花费">深究Solidity中的gas花费</a></p>
+<p>同时，我们在执行结果中也能看出，revert() 返回的结果是</p>
+<blockquote>
+<p>VM error: revert</p>
+</blockquote>
+<p>而 assert() 返回的结果是：</p>
+<blockquote>
+<p>VM error: invalid opcode</p>
+</blockquote>
+<p>这是因为在 EVM 虚拟机执行过程中，assert() 使用的是 0xfe 操作码，而 require() 使用的是0xfd 操作码。而 0xfd 操作码会被映射为 REVERT 操作，但是 0xfe 没有对应的操作，因此会报错 invalid opcode。</p>
+<h3 id="revert"><a href="#revert" class="headerlink" title="revert()"></a>revert()</h3><p>revert() 其实和 require() 差不多，两者的操作码一样都是 0xfd，都会返回 VM error: revert 错误，都会返回剩余的 gas：</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517165103.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517165145.png" alt=""></p>
+<p>只不过二者在运用逻辑有点差别：</p>
+<ul>
+<li>revert() 是直接返回错误，不负责条件检查部分</li>
+<li>require() 包括条件检查，但与 revert() 恰好相反，revert() 是在条件失败时报错，而 revert() 是在条件成立时报错</li>
+</ul>
+<h3 id="三者的应用场景"><a href="#三者的应用场景" class="headerlink" title="三者的应用场景"></a>三者的应用场景</h3><ul>
+<li>require()<ul>
+<li>校验输入，例如 require(msg.sender == owner)</li>
+<li>校验外部合约调用的返回值</li>
+<li>在执行一些操作之前做一些状态方面的校验，例如在 ERC-20 转账前，需要校验调用者的余额是否足够 ：require(balanceOf[msg.sender] &gt;= amount)</li>
+</ul>
+</li>
+<li>revert()<ul>
+<li>revert() 的作用和 require() 差不多，一个区别是，revert() 经常用在一些复杂的逻辑中，例如有多个 if/else 语句，其中使用 revert() 可能更加合适</li>
+</ul>
+</li>
+<li>assert()<ul>
+<li>校验数字计算溢出</li>
+<li>校验不应该出现的情况</li>
+<li>会用在逻辑执行之后，校验一些状态值</li>
+<li>预防一些不应该出现的情况</li>
+</ul>
+</li>
+</ul>
+<p>我们将 revert() 与 require() 用在一些正常的条件校验方面，毕竟正常的逻辑执行过程中出现不符合条件的 input 是很正常的，如果出现了这种情况，会返回剩余的 gas，而一些情况例如，整数溢出等，是不应该出现的，如果出现了，很有可能是合约代码出现了 bug。还有一点是使用 assert() 可以预防黑客恶意攻击，如果黑客想使合约达成一定的条件造成合约的崩溃，我们使用 assert() 会耗费完他的所有 gas，那么他的攻击也是成本巨大的。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>三个错误处理方法，各有各自的应用场景，大家可以根据自己的场景应用自如。</p>
+<p>大家如果有什么问题或者想和我交流，欢迎通过邮箱联系我～</p>
+<p><a href="mailto:nahaque52@gmail.com">nahaque52@gmail.com</a></p>
+<p>完结撒花～</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a href="https://medium.com/blockchannel/the-use-of-revert-assert-and-require-in-solidity-and-the-new-revert-opcode-in-the-evm-1a3a7990e06e" target="_blank" rel="noopener">Solidity Learning: Revert(), Assert(), and Require() in Solidity, and the New REVERT Opcode in the EVM</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Solidity/" rel="tag"># Solidity</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/17/%E6%B7%B1%E7%A9%B6Solidity%E4%B8%AD%E7%9A%84gas%E8%8A%B1%E8%B4%B9/" rel="prev" title="深究Solidity中的gas花费">
+      <i class="fa fa-chevron-left"></i> 深究Solidity中的gas花费
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#早期版本的错误处理-throw"><span class="nav-text">早期版本的错误处理 throw</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#require-与-assert"><span class="nav-text">require 与 assert</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#revert"><span class="nav-text">revert()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三者的应用场景"><span class="nav-text">三者的应用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="PolarSpace"
+      src="/images/myhead.jpeg">
+  <p class="site-author-name" itemprop="name">PolarSpace</p>
+  <div class="site-description" itemprop="description">登峰造极境</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="gray">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">PolarSpace</span>
+</div>
+  <!--<div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

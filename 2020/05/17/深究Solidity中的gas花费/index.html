@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/myhead.jpeg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="gas 花费我们都知道在以太坊中执行合约是需要花费 gas 的，但是这个 gas 是怎么计算出来的呢，今天我们就来深入研究一下 首先我们看一个很简单的合约 1234567891011pragma solidity ^0.6.0;contract SimpleStorage &amp;#123;        uint public store;        function setStore(uint">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深究Solidity中的gas花费">
+<meta property="og:url" content="http://yoursite.com/2020/05/17/%E6%B7%B1%E7%A9%B6Solidity%E4%B8%AD%E7%9A%84gas%E8%8A%B1%E8%B4%B9/index.html">
+<meta property="og:site_name" content="PolarSpace">
+<meta property="og:description" content="gas 花费我们都知道在以太坊中执行合约是需要花费 gas 的，但是这个 gas 是怎么计算出来的呢，今天我们就来深入研究一下 首先我们看一个很简单的合约 1234567891011pragma solidity ^0.6.0;contract SimpleStorage &amp;#123;        uint public store;        function setStore(uint">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517102311.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517104807.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517110115.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517113218.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517113817.png">
+<meta property="article:published_time" content="2020-05-17T02:13:11.000Z">
+<meta property="article:modified_time" content="2020-05-17T03:55:17.054Z">
+<meta property="article:author" content="PolarSpace">
+<meta property="article:tag" content="Solidity">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517102311.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/05/17/%E6%B7%B1%E7%A9%B6Solidity%E4%B8%AD%E7%9A%84gas%E8%8A%B1%E8%B4%B9/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>深究Solidity中的gas花费 | PolarSpace</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">PolarSpace</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">极</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/17/%E6%B7%B1%E7%A9%B6Solidity%E4%B8%AD%E7%9A%84gas%E8%8A%B1%E8%B4%B9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/myhead.jpeg">
+      <meta itemprop="name" content="PolarSpace">
+      <meta itemprop="description" content="登峰造极境">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="PolarSpace">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          深究Solidity中的gas花费
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-17 10:13:11 / 修改时间：11:55:17" itemprop="dateCreated datePublished" datetime="2020-05-17T10:13:11+08:00">2020-05-17</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="gas-花费"><a href="#gas-花费" class="headerlink" title="gas 花费"></a>gas 花费</h3><p>我们都知道在以太坊中执行合约是需要花费 gas 的，但是这个 gas 是怎么计算出来的呢，今天我们就来深入研究一下</p>
+<p>首先我们看一个很简单的合约</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity ^0.6.0;</span><br><span class="line"></span><br><span class="line">contract SimpleStorage &#123;</span><br><span class="line">    </span><br><span class="line">    uint public store;</span><br><span class="line">    </span><br><span class="line">    function setStore(uint _store) public &#123;</span><br><span class="line">        store &#x3D; _store;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<p>这个合约很简单，功能一目了然。我们这里使用 <a href="">Remix</a> 编译器来研究它的 gas 花费。</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517102311.png" alt=""></p>
+<p>首先我们部署合约，然后调用 setScore 方法，参数为 3。图中可以看出，与 gas 相关的数据总共三个，分别是</p>
+<ul>
+<li>gas</li>
+<li>transaction cost</li>
+<li>execution cost</li>
+</ul>
+<h3 id="transaction-cost"><a href="#transaction-cost" class="headerlink" title="transaction cost"></a>transaction cost</h3><p>首先，第一项 gas 就是我们在执行 setScore 方法时，所设置的 gas 花费，如果在执行过程中，花费完了还没有执行完合约，那么是不会退还 gas 的，如果执行完合约 gas 没有花费完，则会退还剩余 gas。</p>
+<p>其次，剩余两项 transaction cost 和 execution cost，这两项的关系是：</p>
+<blockquote>
+<p>transaction cost = 真实的 transaction cost + execution cost</p>
+</blockquote>
+<p>这是什么意思呢，我们需要知道在发送合约执行的过程中，gas 的花费是分为两部分的，一部分是，创建合约发送参数所需要的 gas，另一部分是合约代码真实执行逻辑的时候所需要的 gas。</p>
+<p>那么就说明在本次 setScore 方法中，上面的等式意味着：</p>
+<blockquote>
+<p>41684 = 真实的 transaction cost + 20220</p>
+</blockquote>
+<p>可得，真实的 transaction cost 为 21464，那么这个数是怎么算出来的呢？</p>
+<p>首先看 setScore 的 input 元素：</p>
+<blockquote>
+<p>0x7f626f1a0000000000000000000000000000000000000000000000000000000000000003</p>
+</blockquote>
+<p>这个值其实是由函数签名哈希值的前 4 个字节和 32 字节的填充参数组合而成的。首先，函数的签名是 setStore(uint)，在计算中，实际使用的是 setStore(uint256)，注意在 solidity 中 uint 与 uint256 是一样的。<br>这里的哈希方法使用的是 Keccak-256，可以根据下面的方法获取哈希值：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity ^0.6.0;</span><br><span class="line"></span><br><span class="line">contract HashFunction &#123;</span><br><span class="line">    </span><br><span class="line">    function getHash(string memory _str) public pure returns (bytes32) &#123;</span><br><span class="line">        return keccak256(abi.encodePacked(_str));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>得到函数签名是</p>
+<blockquote>
+<p>0x7f626f1a88f291b8a6ae0310d15c9afdc7156633eab010d4284e4259e4b9a31e</p>
+</blockquote>
+<img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517104807.png" width="50%" height="50%">
+
+<p>取到前 4 个字节，即 0x7f626f1a。函数的参数是 3， 那么它的 32 字节填充值，就是 0x0000000000000000000000000000000000000000000000000000000000000003。这里解释一下，在 16 进制表示中，一个字节占两位，那么 3 的 32 字节填充值，就是前面添加 63 个 0。将两者组合，便可以得到前面的 input 值。</p>
+<p>打开<a href="https://ethereum.github.io/yellowpaper/paper.pdf" target="_blank" rel="noopener">以太坊白皮书</a>，在 gas 花费段落，可以看到：</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517110115.png" alt=""></p>
+<ul>
+<li>每笔交易的基础固定支出是 21000 gas</li>
+<li>交易中每个非 0 字节，需要花费 68 gas</li>
+<li>交易中每个 0 字节，需要花费 4 字节</li>
+</ul>
+<p>那么在上面的 input 中，前面函数签名的4个字节是非 0 的，后面参数中前 31 个字节是 0 值，最后一个字节是非 0 值，那么，可以计算出其 gas 花费为</p>
+<blockquote>
+<p>21000 + 31 * 4 + 5 * 68 = 21464</p>
+</blockquote>
+<p>可以看出，确实就是上面的真实 transaction cost。得出结论：</p>
+<blockquote>
+<p>transaction cost = 交易创建，交易参数等花费的gas + 合约实际执行逻辑时所需要的gas</p>
+</blockquote>
+<h3 id="execution-cost"><a href="#execution-cost" class="headerlink" title="execution cost"></a>execution cost</h3><p>计算 execution cost 是比较复杂的，因为涉及底层操作，逻辑太多，一步一步计算不太现实。</p>
+<p>在刚才的 setScore 中，点击 Debug，进入 debug 页面</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517113218.png" alt=""></p>
+<p>这里有几项数据需要注意一下</p>
+<img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200517113817.png" width="50%" height="50%">
+
+<ul>
+<li>gas 是每步操作需要花费的 gas 费用</li>
+<li>remaining gas 是当前剩余的gas</li>
+</ul>
+<p>在第一步时，第一步还没有执行，剩余 gas 是 2978536，我们前面知道交易的发送传递参数等操作花费了 21464 gas，而在发送交易的时候，设置的 gas limit 是 3000000，恰好可以满足：</p>
+<blockquote>
+<p>3000000 = 2978536 + 21464</p>
+</blockquote>
+<p>与前面的理论一致，剩余的 2978536 gas 就是合约执行过程中可以花费的 gas 数量最大值。我们可以点击 step over 按钮执行下一步，每一步都会花费相应的 gas 值，最终执行完成，便构成了上面的 execution cost。</p>
+<p>有一篇 <a href="https://docs.google.com/spreadsheets/d/1n6mRqkBz3iWcOlRem_mO09GtSKEKrAsfO7Frgx18pNU/edit#gid=0" target="_blank" rel="noopener">Excel表格</a>，解释了每一种 opcode 操作码所需要的 gas 数量。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>简单聊了 solidity 中的 gas 机制，明白了 gas 花费是有规则设定的，并不是张口就来的～</p>
+<p>大家如果有什么问题或者想和我交流，欢迎通过邮箱联系我～</p>
+<p><a href="mailto:nahaque52@gmail.com">nahaque52@gmail.com</a></p>
+<p>完结撒花～</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p>这篇文章写得很好，英文不错的同学可以去原文看看，还有视频可以参考</p>
+<p><a href="https://vomtom.at/what-exactly-is-the-gas-limit-and-the-gas-price-in-ethereum/" target="_blank" rel="noopener">https://vomtom.at/what-exactly-is-the-gas-limit-and-the-gas-price-in-ethereum/</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Solidity/" rel="tag"># Solidity</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/16/%E6%B5%81%E7%95%85%E7%9A%84Python-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E7%AC%AC%E4%B8%80%E7%AB%A0/" rel="prev" title="流畅的Python-学习笔记-第一章">
+      <i class="fa fa-chevron-left"></i> 流畅的Python-学习笔记-第一章
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/17/Solidity%E4%B8%AD%E7%9A%84revert-%EF%BC%8Cassert-%E4%B8%8Erequire/" rel="next" title="Solidity中的revert()，assert()与require()">
+      Solidity中的revert()，assert()与require() <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#gas-花费"><span class="nav-text">gas 花费</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#transaction-cost"><span class="nav-text">transaction cost</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#execution-cost"><span class="nav-text">execution cost</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="PolarSpace"
+      src="/images/myhead.jpeg">
+  <p class="site-author-name" itemprop="name">PolarSpace</p>
+  <div class="site-description" itemprop="description">登峰造极境</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="gray">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">PolarSpace</span>
+</div>
+  <!--<div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
