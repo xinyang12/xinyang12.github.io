@@ -21,24 +21,20 @@
     var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="EVM我们在编写 Solidity 代码时，使用的是简单易懂的语法，但是计算机是看不懂的。就好像 Java 一样，在 Java 中，我们编写完代码，首先要把代码编译成二进制字节码 .class 文件，然后将其送入 JVM 中，JVM 再运行代码。在 Solidity 中也是一样，代码先被编译成了二进制字节码，然后被送入 EVM 中运行。其中字节码（Bytecode）是一串16进制的串，而操作码（O">
+  <meta name="description" content="今天临时有个需求，爬取币安的 API，获取每天早上 0 点的开盘价，并导出为 Excel 格式，特地记录一下。 从币安的 k 线数据接口获取数据。有个问题是，如果 interval 为 1d，那么接口会返回每天早上八点，也就是格林尼治时间零点的数据，因此如果 startTime 和 endTime 设置为两天的零点，那么实际获得的数据是这些天内每天早上八点的数据，而不是零点的数据。如果 inter">
 <meta property="og:type" content="article">
-<meta property="og:title" content="聊聊Solidity中的Bytecode和Opcode">
-<meta property="og:url" content="http://yoursite.com/2020/05/03/%E8%81%8A%E8%81%8ASolidity%E4%B8%AD%E7%9A%84Bytecode%E5%92%8COpcode/index.html">
+<meta property="og:title" content="Python获取币安行情并导出Excel">
+<meta property="og:url" content="http://yoursite.com/2020/05/19/Python%E8%8E%B7%E5%8F%96%E5%B8%81%E5%AE%89%E8%A1%8C%E6%83%85%E5%B9%B6%E5%AF%BC%E5%87%BAExcel/index.html">
 <meta property="og:site_name" content="PolarSpace">
-<meta property="og:description" content="EVM我们在编写 Solidity 代码时，使用的是简单易懂的语法，但是计算机是看不懂的。就好像 Java 一样，在 Java 中，我们编写完代码，首先要把代码编译成二进制字节码 .class 文件，然后将其送入 JVM 中，JVM 再运行代码。在 Solidity 中也是一样，代码先被编译成了二进制字节码，然后被送入 EVM 中运行。其中字节码（Bytecode）是一串16进制的串，而操作码（O">
+<meta property="og:description" content="今天临时有个需求，爬取币安的 API，获取每天早上 0 点的开盘价，并导出为 Excel 格式，特地记录一下。 从币安的 k 线数据接口获取数据。有个问题是，如果 interval 为 1d，那么接口会返回每天早上八点，也就是格林尼治时间零点的数据，因此如果 startTime 和 endTime 设置为两天的零点，那么实际获得的数据是这些天内每天早上八点的数据，而不是零点的数据。如果 inter">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200503131253.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200503131944.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200503132017.png">
-<meta property="article:published_time" content="2020-05-03T04:54:35.000Z">
-<meta property="article:modified_time" content="2020-05-13T02:02:23.601Z">
+<meta property="article:published_time" content="2020-05-19T06:05:15.000Z">
+<meta property="article:modified_time" content="2020-05-19T06:20:21.960Z">
 <meta property="article:author" content="PolarSpace">
-<meta property="article:tag" content="Solidity">
+<meta property="article:tag" content="Python">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200503131253.png">
 
-<link rel="canonical" href="http://yoursite.com/2020/05/03/%E8%81%8A%E8%81%8ASolidity%E4%B8%AD%E7%9A%84Bytecode%E5%92%8COpcode/">
+<link rel="canonical" href="http://yoursite.com/2020/05/19/Python%E8%8E%B7%E5%8F%96%E5%B8%81%E5%AE%89%E8%A1%8C%E6%83%85%E5%B9%B6%E5%AF%BC%E5%87%BAExcel/">
 
 
 <script id="page-configurations">
@@ -51,7 +47,7 @@
   };
 </script>
 
-  <title>聊聊Solidity中的Bytecode和Opcode | PolarSpace</title>
+  <title>Python获取币安行情并导出Excel | PolarSpace</title>
   
 
 
@@ -172,7 +168,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/03/%E8%81%8A%E8%81%8ASolidity%E4%B8%AD%E7%9A%84Bytecode%E5%92%8COpcode/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/19/Python%E8%8E%B7%E5%8F%96%E5%B8%81%E5%AE%89%E8%A1%8C%E6%83%85%E5%B9%B6%E5%AF%BC%E5%87%BAExcel/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/myhead.jpeg">
@@ -185,7 +181,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          聊聊Solidity中的Bytecode和Opcode
+          Python获取币安行情并导出Excel
         </h1>
 
         <div class="post-meta">
@@ -194,16 +190,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2020-05-03 12:54:35" itemprop="dateCreated datePublished" datetime="2020-05-03T12:54:35+08:00">2020-05-03</time>
+              <time title="创建时间：2020-05-19 14:05:15 / 修改时间：14:20:21" itemprop="dateCreated datePublished" datetime="2020-05-19T14:05:15+08:00">2020-05-19</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-05-13 10:02:23" itemprop="dateModified" datetime="2020-05-13T10:02:23+08:00">2020-05-13</time>
-              </span>
 
           
 
@@ -216,40 +206,13 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="EVM"><a href="#EVM" class="headerlink" title="EVM"></a>EVM</h3><p>我们在编写 Solidity 代码时，使用的是简单易懂的语法，但是计算机是看不懂的。就好像 Java 一样，在 Java 中，我们编写完代码，首先要把代码编译成二进制字节码 .class 文件，然后将其送入 JVM 中，JVM 再运行代码。在 Solidity 中也是一样，代码先被编译成了二进制字节码，然后被送入 EVM 中运行。其中字节码（Bytecode）是一串16进制的串，而操作码（Opcode）是一串类似于汇编语言的代码。字节码和操作码是可以相互转换的，实际在 EVM 中执行的是字节码，操作码是为了让人容易阅读。</p>
+        <p>今天临时有个需求，爬取币安的 API，获取每天早上 0 点的开盘价，并导出为 Excel 格式，特地记录一下。</p>
+<p>从币安的 <a href="https://binance-docs.github.io/apidocs/spot/cn/#k" target="_blank" rel="noopener">k 线数据</a>接口获取数据。有个问题是，如果 interval 为 1d，那么接口会返回每天早上八点，也就是格林尼治时间零点的数据，因此如果 startTime 和 endTime 设置为两天的零点，那么实际获得的数据是这些天内每天早上八点的数据，而不是零点的数据。如果 interval 设置成 12h，同样是获取到早八点和晚八点的数据，我估计这里应该是时区的问题，没有深入追究，最后将需求改为获取每天早上八点的数据。</p>
 <a id="more"></a>
 
-<h3 id="字节码与操作码"><a href="#字节码与操作码" class="headerlink" title="字节码与操作码"></a>字节码与操作码</h3><p>编写一段简单的合约代码</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity ^0.6.0;</span><br><span class="line"></span><br><span class="line">contract HelloWorld &#123;</span><br><span class="line">    </span><br><span class="line">    string public name;</span><br><span class="line">    </span><br><span class="line">    function setName(string memory _name) public &#123;</span><br><span class="line">        name &#x3D; _name;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从时间戳转换网站，将想要的时间转成对应的时间戳</span></span><br><span class="line">payload = &#123;<span class="string">'symbol'</span>: <span class="string">'ETHUSDT'</span>, <span class="string">'interval'</span>: <span class="string">'1d'</span>, </span><br><span class="line">        <span class="string">'startTime'</span>: <span class="number">1589702400000</span>, <span class="string">'endTime'</span>: <span class="number">1589875200000</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从接口获取数据</span></span><br><span class="line">req =json.loads(</span><br><span class="line">    requests.get(<span class="string">'https://api.binance.com/api/v3/klines'</span>, params=payload).text)</span><br><span class="line"></span><br><span class="line">re = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> req:</span><br><span class="line">    <span class="comment"># 将时间戳转换成正常阅读格式的时间，除以1000是因为单位是毫秒</span></span><br><span class="line">    i[<span class="number">0</span>] = str(datetime.fromtimestamp(i[<span class="number">0</span>]/<span class="number">1000.0</span>))</span><br><span class="line">    <span class="comment"># 只需要时间和开盘价即可，其他数据不需要</span></span><br><span class="line">    re.append(i[:<span class="number">2</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输入 Excel，这块用到了pandas，不太懂，从网上复制的</span></span><br><span class="line">df = pd.DataFrame(re)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 注意前面的参数是文件名</span></span><br><span class="line">writer = pd.ExcelWriter(<span class="string">'test.xlsx'</span>, engine=<span class="string">'xlsxwriter'</span>)</span><br><span class="line"></span><br><span class="line">df.to_excel(writer, sheet_name=<span class="string">'welcome'</span>, index=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">writer.save()</span><br></pre></td></tr></table></figure>
 
-<p>在 Remix 中或者本地使用 solc 编译，即可得到这段 Solidity 代码的字节码和操作码</p>
-<img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200503131253.png" width="50%" height="50%">
-
-<p>可以看到图中 BYTECODE 一栏中的 object 即是字节码，opcodes 自然就是操作码</p>
-<p>字节码：</p>
-<blockquote>
-<p>608060405234801561001057600080fd5b5061030c806100206000396000f3…</p>
-</blockquote>
-<p>操作码</p>
-<blockquote>
-<p>PUSH1 0x80 PUSH1 0x40 MSTORE …</p>
-</blockquote>
-<p>字节码和操作码是可以相互转换的。在<a href="https://ethereum.github.io/yellowpaper/paper.pdf" target="_blank" rel="noopener">以太坊黄皮书</a>中，我们可以看到他们是一一对应的：</p>
-<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200503131944.png" alt=""></p>
-<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200503132017.png" alt=""></p>
-<p>PUSH1 对应着 0x60， MSTORE 对应着 0x52，因此上面的一行操作码就可以翻译成</p>
-<blockquote>
-<p>0x60 0x80 0x60 0x40 0x52 …</p>
-</blockquote>
-<p>与字节码前面是一致的，可以说明两者确实是相互对应的</p>
-<p>注意这里的数据均是16进制的数字，因此上面操作码中的 0x80 和 0x40 并不是80和40， 而是128和64（16进制转10进制）</p>
-<p>看到上面的 PUSH 关键字，可能有的朋友就想起了在数据结构中，栈结构有个操作就是 PUSH。EVM 确实就是一个堆栈结构机器（<a href="https://en.wikipedia.org/wiki/Stack_machine" target="_blank" rel="noopener">Stack Machine</a>）。那么上面的字节码就可以翻译成将 0x80 加入栈中，再将 0x40 压入栈中。</p>
-<p>在 EVM 中，有三个地方可以存储数据。首先是在栈里面，使用 PUSH 操作码将数据压入栈中。其次是在内存（RAM）中，使用 MSTORE 关键字存储。最后是在磁盘存储（disk storage）中，使用 SSTORE 关键字存储数据。其中存储在磁盘（storage）中的最昂贵的，也就是最费 gas 的，而存在栈中是最便宜的。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>简单说了一下 Solidity 语言中的字节码（Bytecode）和操作码（Opcode），其实他们是相互对应的，都是 Solidity 编译后的结果。当然了，如果你很厉害，直接编写它俩也是可以的，就和直接写汇编一样。操作码有时候也是挺有用的，比如说优化代码，想要减少 gas 费用，以及一些错误处理的时候，都会提供许多帮助。</p>
-<p>大家如果有什么问题或者想和我交流，欢迎通过邮箱联系我～</p>
-<p><a href="mailto:nahaque52@gmail.com">nahaque52@gmail.com</a></p>
-<p>完结撒花～</p>
-<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a href="https://medium.com/@blockchain101/solidity-bytecode-and-opcode-basics-672e9b1a88c2" target="_blank" rel="noopener">https://medium.com/@blockchain101/solidity-bytecode-and-opcode-basics-672e9b1a88c2</a></p>
+<p>执行即可在本文件夹下生成相应的 Excel 文件。</p>
 
     </div>
 
@@ -259,7 +222,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/Solidity/" rel="tag"># Solidity</a>
+              <a href="/tags/Python/" rel="tag"># Python</a>
           </div>
 
         
@@ -268,13 +231,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/04/29/web3py%E7%AE%80%E5%8D%95%E5%85%A5%E9%97%A8/" rel="prev" title="Web3.py 简单入门教程">
-      <i class="fa fa-chevron-left"></i> Web3.py 简单入门教程
+    <a href="/2020/05/17/Solidity%E4%B8%AD%E7%9A%84revert-%EF%BC%8Cassert-%E4%B8%8Erequire/" rel="prev" title="Solidity中的revert()，assert()与require()">
+      <i class="fa fa-chevron-left"></i> Solidity中的revert()，assert()与require()
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/05/05/%E5%8F%91%E8%A1%8C%E4%B8%80%E4%B8%AA%E8%87%AA%E5%B7%B1%E7%9A%84ERC20%E4%BB%A3%E5%B8%81/" rel="next" title="发行一个自己的ERC-20代币">
-      发行一个自己的ERC-20代币 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -333,7 +293,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#EVM"><span class="nav-text">EVM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字节码与操作码"><span class="nav-text">字节码与操作码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-text">参考资料</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
