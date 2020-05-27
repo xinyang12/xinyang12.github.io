@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/myhead.jpeg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Solidity 中，fallback 函数有两个作用：  被调用的合约没有相应的方法对应，则会触发被调用合约的 fallback 函数 单纯向被调用合约转账以太币的时候，会调用 fallback 函数  在 Solidity 0.6.0 版本之前，fallback 函数处理上述两种情况。而在 0.6.0 之后，变成了 fallback 和 receive 两个函数，分别用于处理上面的情况 1 和">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Solidity中的fallback回退函数">
+<meta property="og:url" content="http://yoursite.com/2020/05/20/Solidity%E4%B8%AD%E7%9A%84fallback%E5%9B%9E%E9%80%80%E5%87%BD%E6%95%B0/index.html">
+<meta property="og:site_name" content="PolarSpace">
+<meta property="og:description" content="Solidity 中，fallback 函数有两个作用：  被调用的合约没有相应的方法对应，则会触发被调用合约的 fallback 函数 单纯向被调用合约转账以太币的时候，会调用 fallback 函数  在 Solidity 0.6.0 版本之前，fallback 函数处理上述两种情况。而在 0.6.0 之后，变成了 fallback 和 receive 两个函数，分别用于处理上面的情况 1 和">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200520220635.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200520220850.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200520222517.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200520222716.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200520233622.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200520233854.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200527223257.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200527224055.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200527225459.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200527225652.png">
+<meta property="article:published_time" content="2020-05-20T13:32:26.000Z">
+<meta property="article:modified_time" content="2020-05-27T15:13:52.020Z">
+<meta property="article:author" content="PolarSpace">
+<meta property="article:tag" content="Solidity">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200520220635.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/05/20/Solidity%E4%B8%AD%E7%9A%84fallback%E5%9B%9E%E9%80%80%E5%87%BD%E6%95%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Solidity中的fallback回退函数 | PolarSpace</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">PolarSpace</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">极</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/20/Solidity%E4%B8%AD%E7%9A%84fallback%E5%9B%9E%E9%80%80%E5%87%BD%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/myhead.jpeg">
+      <meta itemprop="name" content="PolarSpace">
+      <meta itemprop="description" content="登峰造极境">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="PolarSpace">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Solidity中的fallback回退函数
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-20 21:32:26" itemprop="dateCreated datePublished" datetime="2020-05-20T21:32:26+08:00">2020-05-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-05-27 23:13:52" itemprop="dateModified" datetime="2020-05-27T23:13:52+08:00">2020-05-27</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Solidity 中，fallback 函数有两个作用：</p>
+<ul>
+<li>被调用的合约没有相应的方法对应，则会触发被调用合约的 fallback 函数</li>
+<li>单纯向被调用合约转账以太币的时候，会调用 fallback 函数</li>
+</ul>
+<p>在 Solidity 0.6.0 版本之前，fallback 函数处理上述两种情况。而在 0.6.0 之后，变成了 fallback 和 receive 两个函数，分别用于处理上面的情况 1 和情况 2。而早版本的无名 fallback 已经弃用。</p>
+<a id="more"></a>
+
+<h3 id="0-6-0-之前的-fallback-无名函数"><a href="#0-6-0-之前的-fallback-无名函数" class="headerlink" title="0.6.0 之前的 fallback 无名函数"></a>0.6.0 之前的 fallback 无名函数</h3><p>早期的 fallback 函数，是一个没有名字的函数，必须声明为 external，如果想要让其有接收以太币的功能，还需要 payable 关键词。</p>
+<h4 id="接受转账"><a href="#接受转账" class="headerlink" title="接受转账"></a>接受转账</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity ^0.4.24;</span><br><span class="line">contract FallbackTest &#123;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 定义事件，用于观察 fallback 被调用</span><br><span class="line">    event FallbackCalled();</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; external 为必需，payable 为可选参数，用于接收以太币</span><br><span class="line">    function () external payable &#123;</span><br><span class="line">        emit FallbackCalled();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 获取当前合约的余额</span><br><span class="line">    function getBalance() public view returns (uint) &#123;</span><br><span class="line">        return address(this).balance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 Remix 中部署合约，在部署那里的 VALUE 左侧框中填 1，单位选 ether，然后在下面的合约中点击 Transact，这样就可以调用到 fallback 函数。观察控制台，发现确实是触发了 FallbackCalled 事件。</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200520220635.png" alt=""></p>
+<p>同时，点击合约的 getBalance 函数，返回 1 Ether，说明确实已经通过 fallback 函数转账成功。</p>
+<p>现在，去掉 fallback 的 payable 再试试。部署之后，再次输入 1 VALUE，点击 Transact，编译器报错：</p>
+<img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200520220850.png" width="50%" height="50%">
+
+<p>说明 fallback 确实是需要 payable 才可以接受转账。</p>
+<h4 id="无相应函数对应时，默认执行-fallback"><a href="#无相应函数对应时，默认执行-fallback" class="headerlink" title="无相应函数对应时，默认执行 fallback"></a>无相应函数对应时，默认执行 fallback</h4><p>先看一个例子，这里通过 call 方法直接通过签名调用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity ^0.4.24;</span><br><span class="line"></span><br><span class="line">contract FallbackTest &#123;</span><br><span class="line">    </span><br><span class="line">    event FallbackCalled(bytes data);</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 触发事件</span><br><span class="line">    function () external &#123;</span><br><span class="line">        emit FallbackCalled(msg.data);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    event ExistFuncCalled(bytes data, uint256 para);</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 触发事件</span><br><span class="line">    function existFunc(uint256 para) public &#123;</span><br><span class="line">        ExistFuncCalled(msg.data, para);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 调用存在的函数</span><br><span class="line">    function callExistFunc() public &#123;</span><br><span class="line">        address(this).call(abi.encodeWithSignature(&quot;existFunc(uint256)&quot;));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 调用不存在的函数</span><br><span class="line">    function callNonExistFunc() &#123;</span><br><span class="line">        address(this).call(abi.encodeWithSignature(&quot;functionNotExist()&quot;));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于调用合约时没法直接指定调用一个不存在的函数，因此我们使用底层的 call 方法。通过函数签名构造一个存在的函数 existFunc() 和另一个不存在的函数 functionNotExist()，然后通过 call 调用，外层再包装一下。</p>
+<p>调用 callExistFunc 方法，触发了 ExistFuncCalled 事件。</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200520222517.png" alt=""></p>
+<p>调用 callNonExistFunc 方法，触发了 FallbackCalled 事件。</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200520222716.png" alt=""></p>
+<p>说明我们在调用不存在的函数时，确实调用了 fallback 函数。这里需要注意的是，即使没有定义 fallback 函数，调用一个不存在的函数也是可以成功的。同时，不管有没有定义 fallback 函数，只要调用了不存在的函数，call 方法就是返回 false。</p>
+<h3 id="0-6-0-之后的新版-fallback-和-receive-函数"><a href="#0-6-0-之后的新版-fallback-和-receive-函数" class="headerlink" title="0.6.0 之后的新版 fallback 和 receive 函数"></a>0.6.0 之后的新版 fallback 和 receive 函数</h3><p>在 0.6.0 之后的版本，无名的 fallback 函数分成了两个有名的函数，分别是 fallback() 和 receive()。fallack() 专注于在无方法对应时运行，receive() 则只用来接受以太币。要注意的是，两者都必须要用 external 修饰，由于 receive() 是接受以太币的，因此必须有 payable 关键词。fallback() 的 payable 是可选的。两个函数都只能定义一次，当没有定义 receive() 的时候，如果 fallback() 有 payable 关键词，那么也能接受以太币。<strong>如果两个函数都没有被定义，那么合约在接受普通以太币转账的时候会抛出异常。但是要注意，如果该合约是作为 coinbase 铸币交易或 selfdestruct 目标地址时仍然能够接受以太币</strong>（在 0.6.0 版本之前，也有这个机制）。</p>
+<p>仿照前面的例子，写出一个类似的触发事件的合约。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity ^0.6.0;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; Test fallback and receive</span><br><span class="line">contract TestFAR &#123;</span><br><span class="line">    </span><br><span class="line">    event ReceiveCalled();</span><br><span class="line">    </span><br><span class="line">    event FallbackCalled();</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 收钱时触发事件</span><br><span class="line">    receive() external payable &#123;</span><br><span class="line">        emit ReceiveCalled();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 调用不存在的函数时触发事件</span><br><span class="line">    fallback() external &#123;</span><br><span class="line">        emit FallbackCalled();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    function testFallback() public &#123;</span><br><span class="line">        address(this).call(abi.encodeWithSignature(&quot;nonExistedFunction()&quot;));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同样地，在 Remix 中部署后，填写 1 ether 并点击 Transact，看到 ReceiveCalled() 事件被触发：</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200520233622.png" alt=""></p>
+<p>调用 testFallback() 函数后，相应事件也被触发：</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200520233854.png" alt=""></p>
+<p>确实说明了，两个函数各司其职。</p>
+<p>现在，我们删除掉 receive() 函数，然后在 fallback() 函数后面加上 payable 关键词，重新部署之后再次给合约打一个 ether，观察控制台发现，此时调用了 fallback() 函数。这里要注意的是，如果想要通过 fallback() 给合约转账的话，必须要加上 payable 关键词，否则会报错。</p>
+<h3 id="关于-fallback-函数的-gas-费用"><a href="#关于-fallback-函数的-gas-费用" class="headerlink" title="关于 fallback 函数的 gas 费用"></a>关于 fallback 函数的 gas 费用</h3><p>在网上许多资料中，都说 fallback 函数只能接受到 2300 gas。这个说法是不精确的。我们先看一下<a href="https://solidity.readthedocs.io/en/v0.5.0/contracts.html#fallback-function" target="_blank" rel="noopener">官方文档</a>的描述</p>
+<blockquote>
+<p>In the worst case, the fallback function can only rely on 2300 gas being available (for example when send or transfer is used), leaving little room to perform other operations except basic logging.</p>
+</blockquote>
+<p>文档里说在最坏情况下（ 例如使用 send 或者 transfer 转账的时候 ），fallback 函数只有 2300 gas 可用。并不是说 fallback 永远就只有 2300 gas 可用。来看一个例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity ^0.5.0;</span><br><span class="line"></span><br><span class="line">contract Sender &#123;</span><br><span class="line">  </span><br><span class="line">    function testFallback(address payable _receiver) public payable &#123;</span><br><span class="line">        _receiver.transfer(msg.value);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">contract Receiver &#123;</span><br><span class="line">    </span><br><span class="line">    event Receive(uint gasLeft, uint msgValue);</span><br><span class="line">      </span><br><span class="line">    function () external payable &#123;</span><br><span class="line">        emit Receive(gasleft(), msg.value);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，Receiver 合约的 fallback 函数会记录当前的剩余 gas 量和 msg.value。首先部署 Receiver 合约，然后部署 Sender 合约。使用 Receiver 合约的地址作为参数调用 Sender 的 testFallback 函数（同时转入 1 ether），查看执行结果，已经成功触发了 Receive 事件，并且 gasLeft 为 2277，符合只有 2300 gas 的规定。</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200527223257.png" alt=""></p>
+<p>send() 函数也是有 2300 gas 的限制，大家可以自己试一下。</p>
+<p>我们现在修改一下合约，将 testFallback 函数变为如下所示，不进行转账，只是调用一个不存在的函数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function testFallback(address payable _receiver) public payable &#123;</span><br><span class="line">    address(_receiver).call(abi.encodeWithSignature(&quot;nonExistedFunction()&quot;));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同样进行上面的部署步骤，然后使用 Receiver 的地址作为参数调用 Sender 的 testFallback 函数，可以看到 gasLeft 变得非常大，不止 2300 gas，而这个数正是我们发送交易的时候设置的 gasLimit 的量：</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200527224055.png" alt=""></p>
+<p>现在我们使用比较低级的 call 进行转账操作，将 testFallback 函数改写为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function testFallback(address payable _receiver) public payable &#123;</span><br><span class="line">    address(_receiver).call.value(msg.value).gas(50000)(&quot;&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里我们使用 gas() 方法可以设置 gas 量。同样使用上面的部署步骤，然后将 Receiver 的地址作为参数调用 Sender 的 testFallback 函数。这里有个地方要注意，如果在调用的时候不进行转账操作，那么 fallback 函数可用的 gas 为：</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200527225459.png" alt=""></p>
+<p>符合 50000 的设置，而如果我们在调用的时候同时进行转账操作，结果变为了：</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200527225652.png" alt=""></p>
+<p>可用 gas 量居然超过了设置的 50000，而巧合的是</p>
+<blockquote>
+<p>52277 - 49977 = 2300</p>
+</blockquote>
+<p>而且，这里不论转多少钱，都是这个数值。这里我就不太懂了，难道是 call 作为转账操作时默认就有 2300 gas 的可使用量。先留个坑，以后学习了再来填坑。</p>
+<p>对于 0.6.0 之后的具名函数 fallback() 和 receive() 函数，也是同样的道理，如果使用 send() 和 transfer() 进行转账操作。那么可用的 gas 量就是 2300。而如果使用毕竟低级的 call() 函数进行转账，默认就会使用剩余的全部可用 gas。也可以使用 gas() 方法设置 gas limit。</p>
+<p>看到这里，大家就能明白，其实 fallback 并没有 gas 限制，只是在调用 fallback 的时候，send() 和 transfer() 函数会有 2300 gas 的限制，使用 call() 就可以突破这个限制。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>fallback 函数是 solidity 中的一个比较重要的函数，这篇文章主要通过几个例子讲了 fallback 函数各个版本的用法以及 gas 的问题，希望大家看完能有所收获～</p>
+<p>大家如果有什么问题或者想和我交流，欢迎通过邮箱联系我～</p>
+<p><a href="mailto:nahaque52@gmail.com">nahaque52@gmail.com</a></p>
+<p>完结撒花～</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a href="https://solidity.readthedocs.io/en/v0.5.0/contracts.html#fallback-function" target="_blank" rel="noopener">0.5.0官方文档</a></p>
+<p><a href="https://solidity.readthedocs.io/en/v0.6.0/contracts.html#receive-ether-function" target="_blank" rel="noopener">0.6.0官方文档</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Solidity/" rel="tag"># Solidity</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/19/Python%E8%8E%B7%E5%8F%96%E5%B8%81%E5%AE%89%E8%A1%8C%E6%83%85%E5%B9%B6%E5%AF%BC%E5%87%BAExcel/" rel="prev" title="Python获取币安行情并导出Excel">
+      <i class="fa fa-chevron-left"></i> Python获取币安行情并导出Excel
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0-6-0-之前的-fallback-无名函数"><span class="nav-text">0.6.0 之前的 fallback 无名函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#接受转账"><span class="nav-text">接受转账</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#无相应函数对应时，默认执行-fallback"><span class="nav-text">无相应函数对应时，默认执行 fallback</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0-6-0-之后的新版-fallback-和-receive-函数"><span class="nav-text">0.6.0 之后的新版 fallback 和 receive 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于-fallback-函数的-gas-费用"><span class="nav-text">关于 fallback 函数的 gas 费用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="PolarSpace"
+      src="/images/myhead.jpeg">
+  <p class="site-author-name" itemprop="name">PolarSpace</p>
+  <div class="site-description" itemprop="description">登峰造极境</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="gray">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">PolarSpace</span>
+</div>
+  <!--<div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
