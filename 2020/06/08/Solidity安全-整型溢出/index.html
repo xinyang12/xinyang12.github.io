@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/myhead.jpeg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="什么是 Solidity 中的整型溢出我们知道，由于整数在计算机中是按位存储的，因此在编程语言中会出现整数溢出的问题。而 Solidity 中也存在同样的问题。在 Solidity 中，包含了多种整数类型，比如 uint8，uint16，… uint256等等。其各自可以存储的数据从小到大。例如 uint8 就只能存储  0 ~ 2 ^ 8 -1  即 0 - 255 一共 256 个数字（由于是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Solidity安全 - 整型溢出">
+<meta property="og:url" content="http://yoursite.com/2020/06/08/Solidity%E5%AE%89%E5%85%A8-%E6%95%B4%E5%9E%8B%E6%BA%A2%E5%87%BA/index.html">
+<meta property="og:site_name" content="PolarSpace">
+<meta property="og:description" content="什么是 Solidity 中的整型溢出我们知道，由于整数在计算机中是按位存储的，因此在编程语言中会出现整数溢出的问题。而 Solidity 中也存在同样的问题。在 Solidity 中，包含了多种整数类型，比如 uint8，uint16，… uint256等等。其各自可以存储的数据从小到大。例如 uint8 就只能存储  0 ~ 2 ^ 8 -1  即 0 - 255 一共 256 个数字（由于是">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200608155611.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200608160051.png">
+<meta property="article:published_time" content="2020-06-08T04:24:03.000Z">
+<meta property="article:modified_time" content="2020-06-08T15:09:07.656Z">
+<meta property="article:author" content="PolarSpace">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200608155611.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/06/08/Solidity%E5%AE%89%E5%85%A8-%E6%95%B4%E5%9E%8B%E6%BA%A2%E5%87%BA/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Solidity安全 - 整型溢出 | PolarSpace</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">PolarSpace</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">极</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/08/Solidity%E5%AE%89%E5%85%A8-%E6%95%B4%E5%9E%8B%E6%BA%A2%E5%87%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/myhead.jpeg">
+      <meta itemprop="name" content="PolarSpace">
+      <meta itemprop="description" content="登峰造极境">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="PolarSpace">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Solidity安全 - 整型溢出
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-06-08 12:24:03 / 修改时间：23:09:07" itemprop="dateCreated datePublished" datetime="2020-06-08T12:24:03+08:00">2020-06-08</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="什么是-Solidity-中的整型溢出"><a href="#什么是-Solidity-中的整型溢出" class="headerlink" title="什么是 Solidity 中的整型溢出"></a>什么是 Solidity 中的整型溢出</h3><p>我们知道，由于整数在计算机中是按位存储的，因此在编程语言中会出现整数溢出的问题。而 Solidity 中也存在同样的问题。在 Solidity 中，包含了多种整数类型，比如 uint8，uint16，… uint256等等。其各自可以存储的数据从小到大。例如 uint8 就只能存储</p>
+<blockquote>
+<p>0 ~ 2 ^ 8 -1</p>
+</blockquote>
+<p>即 0 - 255 一共 256 个数字（由于是无符号整型，因此没有负数）。那么同理，uint256 能够存储的范围是 </p>
+<blockquote>
+<p>0 ~ 2 ^ 256 - 1。</p>
+</blockquote>
+<p>先来看一个简单的例子:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function overflow(uint8 a) public pure returns (uint8) &#123;</span><br><span class="line">    return a + 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<p>在这里，入参和出参都是 uint8 类型的，也就是说它们的最大值是 255。部署之后并测试一下，当传入 1，返回 2， 传入 100，返回 101，都是没有问题的。而如果我们传入 255，发现函数返回了 0。其实这个不难理解，在计算机中，由于数字是二进制存储的，因此 255 实际存储为</p>
+<blockquote>
+<p>11111111</p>
+</blockquote>
+<p>要给它加上 1，那么结果就是</p>
+<blockquote>
+<p>100000000</p>
+</blockquote>
+<p>这是正确的结果，而由于现在只有 8 个存储位，所以最前面的 1 就被舍弃了，因此结果就变成了</p>
+<blockquote>
+<p>00000000</p>
+</blockquote>
+<p>即 0。对于其他的 uint16，uint256 等也是存在这个问题的。</p>
+<p>同时，这个问题会造成一个很有趣的结果就是，对于任意一个 uint8 类型的数来说，加上 256 的结果还是其本身。这有点像三角函数：</p>
+<blockquote>
+<p>sin(a) = sin(a + 2 pi)</p>
+</blockquote>
+<p>也就是说对于任意一个 uintN 类型的数 a，都有</p>
+<blockquote>
+<p>a + 2 ^ N = a</p>
+</blockquote>
+<p>而这个上面这些事实在合约中可能就会造成漏洞。</p>
+<h3 id="简单示例"><a href="#简单示例" class="headerlink" title="简单示例"></a>简单示例</h3><p>接下来我们看一个<a href="https://blog.sigmaprime.io/solidity-security.html" target="_blank" rel="noopener">例子</a>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity 0.6.0;</span><br><span class="line"></span><br><span class="line">contract TimeLock &#123;</span><br><span class="line"></span><br><span class="line">    mapping(address &#x3D;&gt; uint) public balances;</span><br><span class="line">    mapping(address &#x3D;&gt; uint) public lockTime;</span><br><span class="line"></span><br><span class="line">    function deposit() public payable &#123;</span><br><span class="line">        balances[msg.sender] +&#x3D; msg.value;</span><br><span class="line">        lockTime[msg.sender] &#x3D; now + 1 weeks;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    function increaseLockTime(uint _secondsToIncrease) public &#123;</span><br><span class="line">        lockTime[msg.sender] +&#x3D; _secondsToIncrease;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    function withdraw() public &#123;</span><br><span class="line">        require(balances[msg.sender] &gt; 0);</span><br><span class="line">        require(now &gt; lockTime[msg.sender]);</span><br><span class="line">        uint transferValue &#x3D; balances[msg.sender];</span><br><span class="line">        balances[msg.sender] &#x3D; 0;</span><br><span class="line">        msg.sender.transfer(transferValue);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个合约一共有三个方法，用户调用 deposit() 函数可以将以太币锁在该合约中，锁定时间为 1 个星期，increaseLockTime() 方法可以增加锁定时间，通过 withdraw() 方法可以取出钱，前提条件是当前时间已经超过了锁定时间。</p>
+<p>正常情况下，用户将钱存入合约，最少需要等待一个星期才能够将钱取出来。如果用户丢失了自己的私钥，被黑客盗用，那么黑客也是必须要等到锁仓时间到期才能取出钱，然而，真的是这样吗？我们注意到 increaseLockTime() 函数中用到了 += 操作，这会不会导致溢出呢。考虑一下，uint 即 uint256，因此其可以存储的范围是 </p>
+<blockquote>
+<p>0 ~ 2 ^ 256 - 1</p>
+</blockquote>
+<p>假设用户锁仓的时间为 userLockTime，那么对于 increaseLockTime() 函数，如果将入参设置为</p>
+<blockquote>
+<p>2 ^ 256 - userLockTime</p>
+</blockquote>
+<p>那么 increaseLockTime() 函数的结果就为</p>
+<blockquote>
+<p>userLockTime + 2 ^ 256 - userLockTime = 2 ^ 256 = 0</p>
+</blockquote>
+<p>也就是说，黑客通过传入一个特定的参数，就可以将用户的锁仓时间归零，那么任意时刻都能取出用户的钱了。</p>
+<p>我们实际部署演练一下，为了方便观察执行结果，我们在 withdraw() 函数中加入异常提示信息:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">require(balances[msg.sender] &gt; 0, &quot;No balance&quot;);</span><br><span class="line">require(now &gt; lockTime[msg.sender], &quot;balance locked&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>在 Remix 中部署，并在调用 deposit 函数时转入一个 ether，此时可以看到，当前数据为</p>
+<img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200608155611.png" width="50%" height="50%">
+
+<p>余额为 1 ether，lockTime 为当前时间一周后的时间，此时我们调用 withdraw 函数会报错。</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200608160051.png" alt=""></p>
+<p>异常信息为</p>
+<blockquote>
+<p>balance locked</p>
+</blockquote>
+<p>说明此时已经锁仓。现在我们按照前面的理论，构造参数 </p>
+<blockquote>
+<p>_secondsToIncrease = 2 ^ 256 - userLockTime</p>
+</blockquote>
+<p>为了方便获取这个值，我们写一个合约来获取：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity 0.6.0;</span><br><span class="line"></span><br><span class="line">contract NewTest &#123;</span><br><span class="line">    </span><br><span class="line">    function get() public pure returns (uint) &#123;</span><br><span class="line">        return 2 ** 256 - 1592207680;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>部署并得到结果为 </p>
+<blockquote>
+<p>115792089237316195423570985008687907853269984665640564039457584007911537432256</p>
+</blockquote>
+<p>将这个数作为参数传入上一个合约的 increaseLockTime 函数，执行结束后再次调用 lockTime，发现结果为 0，此时再调用 withdraw 函数，发现转账成功，成功提取出 1 ether，说明我们已经成功攻击了这个合约。</p>
+<h3 id="真实案例"><a href="#真实案例" class="headerlink" title="真实案例"></a>真实案例</h3><p>整型溢出漏洞的最出名的案例莫过于美链（beatuy chain）了。由于代码中没有处理溢出问题，造成代币大量增发，我们可以看下这次<a href="https://etherscan.io/tx/0xad89ff16fd1ebe3a0a7cf4ed282302c06626c1af33221ebe0d3a470aba4a660f" target="_blank" rel="noopener">交易</a>。可以看到，这笔交易有两笔巨额的转账操作，为什么会出现这种情况呢，我们来看它的<a href="https://etherscan.io/address/0xc5d105e63711398af9bbff092d4b6769c82f793d#code" target="_blank" rel="noopener">代码</a>分析一下。</p>
+<p>在合约中，最终的实现合约是 BecToken，它继承了 PausableToken 合约，在 PausableToken 合约中，有这样一个方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused </span><br><span class="line">        returns (bool) &#123;</span><br><span class="line"></span><br><span class="line">    uint cnt &#x3D; _receivers.length;</span><br><span class="line">    uint256 amount &#x3D; uint256(cnt) * _value;</span><br><span class="line">    require(cnt &gt; 0 &amp;&amp; cnt &lt;&#x3D; 20);</span><br><span class="line">    require(_value &gt; 0 &amp;&amp; balances[msg.sender] &gt;&#x3D; amount);</span><br><span class="line">    </span><br><span class="line">    balances[msg.sender] &#x3D; balances[msg.sender].sub(amount);</span><br><span class="line">    for (uint i &#x3D; 0; i &lt; cnt; i++) &#123;</span><br><span class="line">        balances[_receivers[i]] &#x3D; balances[_receivers[i]].add(_value);</span><br><span class="line">        Transfer(msg.sender, _receivers[i], _value);</span><br><span class="line">    &#125;</span><br><span class="line">    return true;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数实现批量转账功能，调用者调用该函数，传入一个地址数组，代表转账的目标，和转账数量。</p>
+<p>在函数执行中，首先计算调用者转出的总额：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">uint cnt &#x3D; _receivers.length;</span><br><span class="line">uint256 amount &#x3D; uint256(cnt) * _value;</span><br></pre></td></tr></table></figure>
+
+<p>然后校验 0 &lt; 接收的的数量 &lt;= 20，并且调用者需要有充足的余额</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">require(cnt &gt; 0 &amp;&amp; cnt &lt;&#x3D; 20);</span><br><span class="line">require(_value &gt; 0 &amp;&amp; balances[msg.sender] &gt;&#x3D; amount);</span><br></pre></td></tr></table></figure>
+
+<p>然后将调用者的余额减去相应的总额，再分别向接受者转账</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">balances[msg.sender] &#x3D; balances[msg.sender].sub(amount);</span><br><span class="line">for (uint i &#x3D; 0; i &lt; cnt; i++) &#123;</span><br><span class="line">    balances[_receivers[i]] &#x3D; balances[_receivers[i]].add(_value);</span><br><span class="line">    Transfer(msg.sender, _receivers[i], _value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数乍看之下是没有问题的，可是思考一下，我们上一个例子中由于 += 操作会出现溢出问题。再仔细查看一下合约，可以发现这一句：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uint256 amount &#x3D; uint256(cnt) * _value;</span><br></pre></td></tr></table></figure>
+
+<p>这一句就可能会导致溢出问题。我们思考一下，由于 uint256 存储的最大值是 </p>
+<blockquote>
+<p>2 ^ 256 - 1</p>
+</blockquote>
+<p>而如果等号右边的值超过了该值，就会发生溢出。如果构造参数，使得右边的结果为 2 ^ 256，那么最终 amount 的结果就是 …… 0 ! 也就是说，调用者的一分钱都不花（余额减去0），就可以向目标地址转入巨额的代币！</p>
+<p>设想一下，如果我们传入的数组长度为 2，_value 为 </p>
+<blockquote>
+<p>57896044618658097711785492504343953926634992332820282019728792003956564819968</p>
+</blockquote>
+<p>即 2 ^ 255，那么就能够使得该函数中计算的 amount 为 0！</p>
+<p>马上来实践一下，将<a href="https://etherscan.io/address/0xc5d105e63711398af9bbff092d4b6769c82f793d#code" target="_blank" rel="noopener">代码</a>拷贝到 Remix 中，部署 BecToken 合约。首先调用 balanceOf 方法，参数为当前部署者地址，可得当前余额为</p>
+<blockquote>
+<p>7000000000000000000000000000</p>
+</blockquote>
+<p>为正常发行量。然后传入另一个地址调用，结果为 0，正常。</p>
+<p>现在我们调用 batchTransfer 函数（在 Remix 中，点击方法名右边的下拉箭头，这样就可以分别输入 _receivers 和 _value），_receivers 可以输入 Remix 中的其他模拟地址，注意 _receivers 的格式为</p>
+<blockquote>
+<p>[“0x2B63c71298ee8aBA1e53f4AD5C63Ec8DA3f098bc”,”0x8969F157632Dc62AaDb75eDfDcB66a40288AF9Ed”]</p>
+</blockquote>
+<p>两边有方括号，地址带引号。_value 值为</p>
+<blockquote>
+<p>57896044618658097711785492504343953926634992332820282019728792003956564819968</p>
+</blockquote>
+<p>点击 transact，执行成功。现在我们通过 balanceOf 函数，查看合约部署者的余额仍为</p>
+<blockquote>
+<p>7000000000000000000000000000</p>
+</blockquote>
+<p>然后我们再查看上面 _receivers 的两个地址，余额变成了</p>
+<blockquote>
+<p>57896044618658097711785492504343953926634992332820282019728792003956564819968</p>
+</blockquote>
+<p>也就是说明，我们已经凭空增发了如此巨额的代币。</p>
+<h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><p>目前业界对于整型溢出问题的通用解法是使用 OpenZeppelin 的 <a href="https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/math/SafeMath.sol" target="_blank" rel="noopener">SafeMath</a> 库</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; SPDX-License-Identifier: MIT</span><br><span class="line"></span><br><span class="line">pragma solidity ^0.6.0;</span><br><span class="line"></span><br><span class="line">library SafeMath &#123;</span><br><span class="line"></span><br><span class="line">    function add(uint256 a, uint256 b) internal pure returns (uint256) &#123;</span><br><span class="line">        uint256 c &#x3D; a + b;</span><br><span class="line">        require(c &gt;&#x3D; a, &quot;SafeMath: addition overflow&quot;);</span><br><span class="line"></span><br><span class="line">        return c;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    function sub(uint256 a, uint256 b) internal pure returns (uint256) &#123;</span><br><span class="line">        return sub(a, b, &quot;SafeMath: subtraction overflow&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    function sub(uint256 a, uint256 b, string memory errorMessage) </span><br><span class="line">        internal pure returns (uint256) &#123;</span><br><span class="line">            </span><br><span class="line">        require(b &lt;&#x3D; a, errorMessage);</span><br><span class="line">        uint256 c &#x3D; a - b;</span><br><span class="line"></span><br><span class="line">        return c;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    function mul(uint256 a, uint256 b) internal pure returns (uint256) &#123;</span><br><span class="line">        &#x2F;&#x2F; Gas optimization: this is cheaper than requiring &#39;a&#39; not being zero, but the</span><br><span class="line">        &#x2F;&#x2F; benefit is lost if &#39;b&#39; is also tested.</span><br><span class="line">        &#x2F;&#x2F; See: https:&#x2F;&#x2F;github.com&#x2F;OpenZeppelin&#x2F;openzeppelin-contracts&#x2F;pull&#x2F;522</span><br><span class="line">        if (a &#x3D;&#x3D; 0) &#123;</span><br><span class="line">            return 0;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        uint256 c &#x3D; a * b;</span><br><span class="line">        require(c &#x2F; a &#x3D;&#x3D; b, &quot;SafeMath: multiplication overflow&quot;);</span><br><span class="line"></span><br><span class="line">        return c;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    function div(uint256 a, uint256 b) internal pure returns (uint256) &#123;</span><br><span class="line">        return div(a, b, &quot;SafeMath: division by zero&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    function div(uint256 a, uint256 b, string memory errorMessage) </span><br><span class="line">        internal pure returns (uint256) &#123;</span><br><span class="line">            </span><br><span class="line">        require(b &gt; 0, errorMessage);</span><br><span class="line">        uint256 c &#x3D; a &#x2F; b;</span><br><span class="line">        &#x2F;&#x2F; assert(a &#x3D;&#x3D; b * c + a % b); &#x2F;&#x2F; There is no case in which this doesn&#39;t hold</span><br><span class="line"></span><br><span class="line">        return c;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    function mod(uint256 a, uint256 b) internal pure returns (uint256) &#123;</span><br><span class="line">        return mod(a, b, &quot;SafeMath: modulo by zero&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    function mod(uint256 a, uint256 b, string memory errorMessage) </span><br><span class="line">        internal pure returns (uint256) &#123;</span><br><span class="line"></span><br><span class="line">        require(b !&#x3D; 0, errorMessage);</span><br><span class="line">        return a % b;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到 SafeMath 库解决溢出的基本思路是在计算出结果之后，判断结果是否合理，即没有上溢或下溢为一个错误的数值。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>整型溢出是 Solidity 中一个很常见的漏洞，但是经常容易被人忽视从而造成严重的后果。因此，要非常注意代码中的逻辑运算，在计算的时候都使用 SafeMath 库的运算，这样可以避免出现问题。</p>
+<p>大家如果有什么问题或者想和我交流，欢迎通过邮箱联系我～</p>
+<p><a href="mailto:nahaque52@gmail.com">nahaque52@gmail.com</a></p>
+<p>完结撒花～</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a href="https://medium.com/haloblock/unit-underflows-and-overflows-ethereum-solidity-vulnerability-39a39355c422" target="_blank" rel="noopener">https://medium.com/haloblock/unit-underflows-and-overflows-ethereum-solidity-vulnerability-39a39355c422</a></p>
+<p><a href="https://www.anquanke.com/post/id/106382" target="_blank" rel="noopener">https://www.anquanke.com/post/id/106382</a></p>
+<p><a href="https://blog.sigmaprime.io/solidity-security.html" target="_blank" rel="noopener">https://blog.sigmaprime.io/solidity-security.html</a><br>（关于 Solidity 中的一些安全问题，强烈推荐认真阅读）</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/06/02/Solidity%E5%88%A4%E6%96%AD%E5%9C%B0%E5%9D%80%E6%98%AF%E5%90%A6%E4%B8%BA%E5%90%88%E7%BA%A6/" rel="prev" title="Solidity判断地址是否为合约">
+      <i class="fa fa-chevron-left"></i> Solidity判断地址是否为合约
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是-Solidity-中的整型溢出"><span class="nav-text">什么是 Solidity 中的整型溢出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#简单示例"><span class="nav-text">简单示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#真实案例"><span class="nav-text">真实案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方案"><span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="PolarSpace"
+      src="/images/myhead.jpeg">
+  <p class="site-author-name" itemprop="name">PolarSpace</p>
+  <div class="site-description" itemprop="description">登峰造极境</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="gray">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">PolarSpace</span>
+</div>
+  <!--<div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
