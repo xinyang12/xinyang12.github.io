@@ -21,17 +21,22 @@
     var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="登峰造极境">
-<meta property="og:type" content="website">
-<meta property="og:title" content="PolarSpace">
-<meta property="og:url" content="http://yoursite.com/archives/2020/04/index.html">
+  <meta name="description" content="这道题为入门题，主要在于熟悉这套系统，还是比较简单的，跟着提示一步一步来就行 部署之后把前面的命令熟悉熟悉，在第九步时开始做题 1await contract.info()">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ethernaut题解 - Hello Ethernaut">
+<meta property="og:url" content="http://yoursite.com/2020/06/13/Ethernaut%E9%A2%98%E8%A7%A3-Hello-Ethernaut/index.html">
 <meta property="og:site_name" content="PolarSpace">
-<meta property="og:description" content="登峰造极境">
+<meta property="og:description" content="这道题为入门题，主要在于熟悉这套系统，还是比较简单的，跟着提示一步一步来就行 部署之后把前面的命令熟悉熟悉，在第九步时开始做题 1await contract.info()">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-06-13T03:57:54.000Z">
+<meta property="article:modified_time" content="2020-06-13T04:14:53.249Z">
 <meta property="article:author" content="PolarSpace">
+<meta property="article:tag" content="Solidity">
+<meta property="article:tag" content="合约安全">
+<meta property="article:tag" content="Ethernaut">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://yoursite.com/archives/2020/04/">
+<link rel="canonical" href="http://yoursite.com/2020/06/13/Ethernaut%E9%A2%98%E8%A7%A3-Hello-Ethernaut/">
 
 
 <script id="page-configurations">
@@ -39,12 +44,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>归档 | PolarSpace</title>
+  <title>Ethernaut题解 - Hello Ethernaut | PolarSpace</title>
   
 
 
@@ -158,50 +163,145 @@
         <div class="content-wrap">
           
 
-          <div class="content archive">
+          <div class="content post posts-expand">
             
 
+    
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <span class="collection-header">嗯..! 目前共计 15 篇日志。 继续努力。</span>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/13/Ethernaut%E9%A2%98%E8%A7%A3-Hello-Ethernaut/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/myhead.jpeg">
+      <meta itemprop="name" content="PolarSpace">
+      <meta itemprop="description" content="登峰造极境">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="PolarSpace">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Ethernaut题解 - Hello Ethernaut
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-06-13 11:57:54 / 修改时间：12:14:53" itemprop="dateCreated datePublished" datetime="2020-06-13T11:57:54+08:00">2020-06-13</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2020</span>
+        <p>这道题为入门题，主要在于熟悉这套系统，还是比较简单的，跟着提示一步一步来就行</p>
+<p>部署之后把前面的命令熟悉熟悉，在第九步时开始做题</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> contract.info()</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<p>返回</p>
+<blockquote>
+<p>“You will find what you need in info1().”</p>
+</blockquote>
+<p>说明需要调用 info1()</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> contract.info1()</span><br></pre></td></tr></table></figure>
+
+<p>返回</p>
+<blockquote>
+<p>“Try info2(), but with “hello” as a parameter.”</p>
+</blockquote>
+<p>需要调用 info2()，并且参数为 hello</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> contract.info2(<span class="string">"hello"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>返回</p>
+<blockquote>
+<p>“The property infoNum holds the number of the next info method to call.”</p>
+</blockquote>
+<p>这里说明合约有一个属性 infoNum，我们调用之</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> contract.infoNum()</span><br></pre></td></tr></table></figure>
+
+<p>返回一个对象，展开可知结果为 42</p>
+<p>结合上面的提示，可知，我们需要调用 info42() 函数</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> contract.info42()</span><br></pre></td></tr></table></figure>
+
+<p>返回</p>
+<blockquote>
+<p>“theMethodName is the name of the next method.”</p>
+</blockquote>
+<p>说明，下一个要调用的方法名为 theMethodName，调用之</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> contract.theMethodName()</span><br></pre></td></tr></table></figure>
+
+<p>返回</p>
+<blockquote>
+<p>“The method name is method7123949.”</p>
+</blockquote>
+<p>同理，继续调用 method7123949() 函数</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> contract.method7123949()</span><br></pre></td></tr></table></figure>
+
+<p>返回</p>
+<blockquote>
+<p>“If you know the password, submit it to authenticate().”</p>
+</blockquote>
+<p>如果你知道密码，提交到 authenticate() 函数。这里卡了挺久，不太明白这个密码从哪里来，后来看了看合约的 abi，发现有一个 password 属性，那就没问题了，直接调用 passoword 就行了</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> contract.password()</span><br></pre></td></tr></table></figure>
+
+<p>返回</p>
+<blockquote>
+<p>“ethernaut0”</p>
+</blockquote>
+<p>再将其作为参数，调用 authenticate() 函数</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> contract.authenticate(<span class="string">'ethernaut0'</span>)</span><br></pre></td></tr></table></figure>
+
+<p>调用后会启动 MetaMask 发起交易，交易成功后，返回交易的信息。然后点击页面上的 Submit Instance。再次发起一个交易，等待片刻，成功！控制台打印出一连串的 Well Done ～</p>
+<p>You have completed this level!!!</p>
+
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+    
+    
+    
 
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2020-04-29T17:41:58+08:00"
-              content="2020-04-29">
-          04-29
-        </time>
-      </div>
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Solidity/" rel="tag"># Solidity</a>
+              <a href="/tags/%E5%90%88%E7%BA%A6%E5%AE%89%E5%85%A8/" rel="tag"># 合约安全</a>
+              <a href="/tags/Ethernaut/" rel="tag"># Ethernaut</a>
+          </div>
 
-      <div class="post-title">
-          <a class="post-title-link" href="/2020/04/29/web3py%E7%AE%80%E5%8D%95%E5%85%A5%E9%97%A8/" itemprop="url">
-            <span itemprop="name">Web3.py 简单入门教程</span>
-          </a>
-      </div>
+        
 
-    </header>
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/06/12/%E8%87%AA%E5%8A%A8%E4%B8%8A%E4%BC%A0%E5%90%88%E7%BA%A6%E4%BB%A3%E7%A0%81%E5%88%B0Etherscan/" rel="prev" title="自动上传合约代码到Etherscan">
+      <i class="fa fa-chevron-left"></i> 自动上传合约代码到Etherscan
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/06/13/Ethernaut%E9%A2%98%E8%A7%A3-Telephone/" rel="next" title="Ethernaut题解 Telephone">
+      Ethernaut题解 Telephone <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
   </article>
-
-
-    </div>
-  </div>
   
   
-  
-
   
 
 
