@@ -21,24 +21,27 @@
     var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="这道题中的合约很短，分析也很简单，我们想要更改 owner，需要利用这个 changeOwner() 函数，必须满足条件： 1tx.origin !&#x3D; msg.sender">
+  <meta name="description" content="这道题，我只能说，牛皮！是真的皮！ 首先，给没有做出来的同学一点提示，这道题没有任何技术难度，纯粹靠眼力！ 题目提示使用 Remix 是有深意的，哈哈～">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Ethernaut题解 Telephone">
-<meta property="og:url" content="http://yoursite.com/2020/06/13/Ethernaut%E9%A2%98%E8%A7%A3-Telephone/index.html">
+<meta property="og:title" content="Ethernaut题解 Fallout">
+<meta property="og:url" content="http://yoursite.com/2020/06/23/Ethernaut%E9%A2%98%E8%A7%A3-Fallout/index.html">
 <meta property="og:site_name" content="PolarSpace">
-<meta property="og:description" content="这道题中的合约很短，分析也很简单，我们想要更改 owner，需要利用这个 changeOwner() 函数，必须满足条件： 1tx.origin !&#x3D; msg.sender">
+<meta property="og:description" content="这道题，我只能说，牛皮！是真的皮！ 首先，给没有做出来的同学一点提示，这道题没有任何技术难度，纯粹靠眼力！ 题目提示使用 Remix 是有深意的，哈哈～">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200613155446.png">
-<meta property="article:published_time" content="2020-06-13T07:39:10.000Z">
-<meta property="article:modified_time" content="2020-06-13T07:59:01.344Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200623221846.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200623222228.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200623222331.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200623222952.png">
+<meta property="article:published_time" content="2020-06-23T14:03:21.000Z">
+<meta property="article:modified_time" content="2020-06-23T14:32:40.169Z">
 <meta property="article:author" content="PolarSpace">
 <meta property="article:tag" content="Solidity">
 <meta property="article:tag" content="合约安全">
 <meta property="article:tag" content="Ethernaut">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200613155446.png">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200623221846.png">
 
-<link rel="canonical" href="http://yoursite.com/2020/06/13/Ethernaut%E9%A2%98%E8%A7%A3-Telephone/">
+<link rel="canonical" href="http://yoursite.com/2020/06/23/Ethernaut%E9%A2%98%E8%A7%A3-Fallout/">
 
 
 <script id="page-configurations">
@@ -51,7 +54,7 @@
   };
 </script>
 
-  <title>Ethernaut题解 Telephone | PolarSpace</title>
+  <title>Ethernaut题解 Fallout | PolarSpace</title>
   
 
 
@@ -172,7 +175,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/13/Ethernaut%E9%A2%98%E8%A7%A3-Telephone/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/23/Ethernaut%E9%A2%98%E8%A7%A3-Fallout/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/myhead.jpeg">
@@ -185,7 +188,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Ethernaut题解 Telephone
+          Ethernaut题解 Fallout
         </h1>
 
         <div class="post-meta">
@@ -196,7 +199,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-06-13 15:39:10 / 修改时间：15:59:01" itemprop="dateCreated datePublished" datetime="2020-06-13T15:39:10+08:00">2020-06-13</time>
+              <time title="创建时间：2020-06-23 22:03:21 / 修改时间：22:32:40" itemprop="dateCreated datePublished" datetime="2020-06-23T22:03:21+08:00">2020-06-23</time>
             </span>
 
           
@@ -210,26 +213,27 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>这道题中的合约很短，分析也很简单，我们想要更改 owner，需要利用这个 changeOwner() 函数，必须满足条件：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tx.origin !&#x3D; msg.sender</span><br></pre></td></tr></table></figure>
-
+        <p>这道题，我只能说，牛皮！是真的皮！</p>
+<p>首先，给没有做出来的同学一点提示，这道题没有任何技术难度，纯粹靠眼力！</p>
+<p>题目提示使用 Remix 是有深意的，哈哈～</p>
 <a id="more"></a>
 
-<p>这个条件也很好满足，如果我们使用一个外部合约，通过外部合约调用此合约的 changeOwner() 函数，那么 tx.origin 就是我们自己的账户，而 msg.sender 就是这个外部合约。</p>
-<p>接下来写个外部合约就很简单了：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity 0.6.0;</span><br><span class="line"></span><br><span class="line">contract TelephoneAttack &#123;</span><br><span class="line">    </span><br><span class="line">    function callAttack(address _addr) public &#123;</span><br><span class="line">        _addr.call(abi.encodeWithSignature</span><br><span class="line">            (&#39;changeOwner(address)&#39;, msg.sender));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>好了，现在开始说说这道题，这道题让我纠结了好长时间，明明只有构造函数里面才能设置 owner，而唯一更改 owner 的 transferOwnership 函数（在 Ownable 合约中），也是有 onlyOwner 修饰符的（我这里还想了半天是不是 oz 的库有 bug ～）。这就难了，到底该怎么修改 owner 呢。我纠结了好长时间，一直都没有使用 Remix，是因为我以为要在 Remix 中写个合约去调用它。苦于没有思路，那就先把这个题目合约拷贝到 Remix 中吧。好吧，一拷贝，我就知道怎么做了～</p>
+<p>先来看看题目中的合约，我这里不贴代码，只截图～</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200623221846.png" alt=""></p>
+<p>是不是还没有什么思路，然后将它拷贝到 Remix 中并部署（import 的两个库合约直接拷贝过来放在同一个文件里就行），部署完成后看左边：</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200623222228.png" alt=""></p>
+<p>是不是发现了点什么，没错</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200623222331.png" alt=""></p>
+<p>也就是说这个函数并不是构造函数 Fallout 而是一个 Fal1out (l -&gt; 1)，哈哈，如果不是构造函数，也没有修饰符，那就是任何人都可以调用了，那我们直接调用就行了，是不是有点无语。现在再回看前面页面上的原题，是不是不仔细看根本看不出来～</p>
+<p>发现了问题，其实做题就很简单了</p>
+<p>直接在控制台执行：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> contract.Fal1out()</span><br></pre></td></tr></table></figure>
 
-<p>在 Remix 中部署并调用 callAttack 函数，参数传之前题目部署合约时的地址，这里有两点需要注意一下：</p>
-<ul>
-<li>部署和调用的外部地址必须和做题的地址一样</li>
-<li>调用 callAttack 函数的时候，我这里交易执行成功，但是实际上发生了 Out of gas 错误，导致实际并没有成功更新 owner。由于交易执行成功了，我没有进交易详情看，但是 owner 仍然没有改变，我还以为是代码有问题，这里卡了一点时间。解决方法是在交易时 MetaMask 中修改 gas limit</li>
-</ul>
-<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200613155446.png" alt=""></p>
-<p>由于我们在实际调用了 callAttack 方法，此方法调用了 changeOwner 方法，在 changeOwner 中 gas 耗尽，抛出异常，而外层的 call 方法，只是返回了 false，我们没有对其异常处理，因此仍然显示执行成功。</p>
-<p>修改 gas limit 调用成功后，在题目的 console 中输入</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">contract.owner()</span><br></pre></td></tr></table></figure>
-
-<p>可知已经变成了自己的地址，然后提交，成功！</p>
+<p>等待交易执行完毕，再点击 Submit，执行完毕，即通关！</p>
+<p>完成后，题目送出一段话：</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200623222952.png" alt=""></p>
+<p>告诫我们，一些很小的错误，也会酿成严重的后果。不过从这个题目中，我也确实理解了为什么后来 Solidity 要把构造函数改成 constructor 了，这样就不会出现这种低级错误了。</p>
 
     </div>
 
@@ -250,13 +254,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/06/13/Ethernaut%E9%A2%98%E8%A7%A3-Hello-Ethernaut/" rel="prev" title="Ethernaut题解 - Hello Ethernaut">
-      <i class="fa fa-chevron-left"></i> Ethernaut题解 - Hello Ethernaut
+    <a href="/2020/06/14/Django-%E8%B7%AF%E7%94%B1/" rel="prev" title="Django 路由">
+      <i class="fa fa-chevron-left"></i> Django 路由
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/06/13/%E5%88%A9%E7%94%A8Python%E7%94%9F%E6%88%90%E7%BD%91%E7%AB%99%E4%BA%8C%E7%BB%B4%E7%A0%81/" rel="next" title="利用Python生成网址二维码">
-      利用Python生成网址二维码 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
