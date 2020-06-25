@@ -23,7 +23,7 @@
 
   <meta name="description" content="这道题，我只能说，牛皮！是真的皮！ 首先，给没有做出来的同学一点提示，这道题没有任何技术难度，纯粹靠眼力！ 题目提示使用 Remix 是有深意的，哈哈～">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Ethernaut题解 Fallout">
+<meta property="og:title" content="Ethernaut题解 - Fallout">
 <meta property="og:url" content="http://yoursite.com/2020/06/23/Ethernaut%E9%A2%98%E8%A7%A3-Fallout/index.html">
 <meta property="og:site_name" content="PolarSpace">
 <meta property="og:description" content="这道题，我只能说，牛皮！是真的皮！ 首先，给没有做出来的同学一点提示，这道题没有任何技术难度，纯粹靠眼力！ 题目提示使用 Remix 是有深意的，哈哈～">
@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200623222331.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200623222952.png">
 <meta property="article:published_time" content="2020-06-23T14:03:21.000Z">
-<meta property="article:modified_time" content="2020-06-23T14:32:40.169Z">
+<meta property="article:modified_time" content="2020-06-25T08:57:11.356Z">
 <meta property="article:author" content="PolarSpace">
 <meta property="article:tag" content="Solidity">
 <meta property="article:tag" content="合约安全">
@@ -54,7 +54,7 @@
   };
 </script>
 
-  <title>Ethernaut题解 Fallout | PolarSpace</title>
+  <title>Ethernaut题解 - Fallout | PolarSpace</title>
   
 
 
@@ -188,7 +188,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Ethernaut题解 Fallout
+          Ethernaut题解 - Fallout
         </h1>
 
         <div class="post-meta">
@@ -197,10 +197,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-06-23 22:03:21 / 修改时间：22:32:40" itemprop="dateCreated datePublished" datetime="2020-06-23T22:03:21+08:00">2020-06-23</time>
+              <time title="创建时间：2020-06-23 22:03:21" itemprop="dateCreated datePublished" datetime="2020-06-23T22:03:21+08:00">2020-06-23</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-25 16:57:11" itemprop="dateModified" datetime="2020-06-25T16:57:11+08:00">2020-06-25</time>
+              </span>
 
           
 
@@ -225,7 +231,7 @@
 <p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200623222228.png" alt=""></p>
 <p>是不是发现了点什么，没错</p>
 <p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200623222331.png" alt=""></p>
-<p>也就是说这个函数并不是构造函数 Fallout 而是一个 Fal1out (l -&gt; 1)，哈哈，如果不是构造函数，也没有修饰符，那就是任何人都可以调用了，那我们直接调用就行了，是不是有点无语。现在再回看前面页面上的原题，是不是不仔细看根本看不出来～</p>
+<p>也就是说这个函数并不是构造函数 Fallout（如果是构造函数，也就不会在这里显示了） 而是一个 Fal1out (l -&gt; 1)，哈哈，如果不是构造函数，也没有修饰符，那就是任何人都可以调用了，那我们直接调用就行了，是不是有点无语。现在再回看前面页面上的原题，是不是不仔细看根本看不出来～</p>
 <p>发现了问题，其实做题就很简单了</p>
 <p>直接在控制台执行：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> contract.Fal1out()</span><br></pre></td></tr></table></figure>
@@ -257,7 +263,10 @@
     <a href="/2020/06/14/Django-%E8%B7%AF%E7%94%B1/" rel="prev" title="Django 路由">
       <i class="fa fa-chevron-left"></i> Django 路由
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2020/06/23/Ethernaut%E9%A2%98%E8%A7%A3-Token/" rel="next" title="Ethernaut题解 - Token">
+      Ethernaut题解 - Token <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -331,7 +340,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-count">20</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
