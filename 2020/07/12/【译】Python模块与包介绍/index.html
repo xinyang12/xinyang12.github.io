@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/myhead.jpeg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="前言原文链接：https:&#x2F;&#x2F;realpython.com&#x2F;python-modules-packages&#x2F; 一篇比较不错的介绍 Python 模块与包的文章，翻译过来，共同学习～">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【译】Python模块与包介绍">
+<meta property="og:url" content="http://yoursite.com/2020/07/12/%E3%80%90%E8%AF%91%E3%80%91Python%E6%A8%A1%E5%9D%97%E4%B8%8E%E5%8C%85%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="PolarSpace">
+<meta property="og:description" content="前言原文链接：https:&#x2F;&#x2F;realpython.com&#x2F;python-modules-packages&#x2F; 一篇比较不错的介绍 Python 模块与包的文章，翻译过来，共同学习～">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://files.realpython.com/media/pkg1.9af1c7aea48f.png">
+<meta property="og:image" content="https://files.realpython.com/media/pkg2.dab97c2f9c58.png">
+<meta property="og:image" content="https://files.realpython.com/media/pkg3.d2160908ae77.png">
+<meta property="og:image" content="https://files.realpython.com/media/pkg4.a830d6e144bf.png">
+<meta property="article:published_time" content="2020-07-12T05:29:19.000Z">
+<meta property="article:modified_time" content="2020-07-12T09:04:35.128Z">
+<meta property="article:author" content="PolarSpace">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="译文">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://files.realpython.com/media/pkg1.9af1c7aea48f.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/07/12/%E3%80%90%E8%AF%91%E3%80%91Python%E6%A8%A1%E5%9D%97%E4%B8%8E%E5%8C%85%E4%BB%8B%E7%BB%8D/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【译】Python模块与包介绍 | PolarSpace</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">PolarSpace</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">极</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/12/%E3%80%90%E8%AF%91%E3%80%91Python%E6%A8%A1%E5%9D%97%E4%B8%8E%E5%8C%85%E4%BB%8B%E7%BB%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/myhead.jpeg">
+      <meta itemprop="name" content="PolarSpace">
+      <meta itemprop="description" content="登峰造极境">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="PolarSpace">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【译】Python模块与包介绍
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-07-12 13:29:19 / 修改时间：17:04:35" itemprop="dateCreated datePublished" datetime="2020-07-12T13:29:19+08:00">2020-07-12</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>原文链接：<a href="https://realpython.com/python-modules-packages/" target="_blank" rel="noopener">https://realpython.com/python-modules-packages/</a></p>
+<p>一篇比较不错的介绍 Python 模块与包的文章，翻译过来，共同学习～</p>
+<a id="more"></a>
+
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>这篇文章研究了 Python 的模块（modules）与 Python 的包（packages），两种促进模块化编程（modular programming）的机制</p>
+<p>模块化编程（modular programming）指的是将一个庞大的、笨拙的编程任务分解为独立的、较小的、更易于管理的子任务或模块的过程。然后，可以像构建块一样将各个模块拼凑在一起，以创建更大的应用程序。</p>
+<p>在大型应用程序中模块化代码有几个优点：</p>
+<ul>
+<li><p>简易性（Simplicity）：模块通常关注问题的一个相对较小的部分，而不是关注手头的整个问题。如果你专注于一个单一的模块，那么遇到的问题就会小很多。这会使得开发变得更容易，更不容易出错。</p>
+</li>
+<li><p>可维护性（Maintainability）：模块被设计得边界性比较强。这样的话，如果模块以最小化相互依赖性的方式编写，那么修改单个模块对程序的其他部分产生影响的可能性就会降低。你甚至可以在对模块之外啥都不懂的情况下对模块进行修改。这使得由许多程序员组成的团队在大型应用程序上协作更可行。</p>
+</li>
+<li><p>可重用性（Reusability）：定义在单个模块中的功能可以被程序的其他部分轻松重用（通过适当得定义接口）。这样可以减少重复代码。</p>
+</li>
+<li><p>作用域（Scoping）：模块通常定义一个单独的命名空间，这有助于避免程序中不同区域的标识符之间的冲突。（<a href="https://www.python.org/dev/peps/pep-0020/" target="_blank" rel="noopener">Python 之禅</a>中的一个原则就是 <em>命名空间是一个伟大的想法，让我们做更多这样的事情</em>）</p>
+</li>
+</ul>
+<p>函数、模块和包都是Python中促进代码模块化的结构。</p>
+<h2 id="Python-模块（Modules）：概述"><a href="#Python-模块（Modules）：概述" class="headerlink" title="Python 模块（Modules）：概述"></a>Python 模块（Modules）：概述</h2><p>在 Python 中有三种方法定义一个模块：</p>
+<ol>
+<li>Python 自己可以编写模块。</li>
+<li>C 语言可以编写模块并且在运行时动态加载，re （正则表达式）模块就是这样。</li>
+<li>内置模块本质上包含在解释器中，比如itertools模块。</li>
+</ol>
+<p>不过想要使用模块的方法只有一种：使用 import 语句。</p>
+<p>现在，我们的关注点主要在 Python 编写的模块上。编写 Python 模块是非常简单易懂的。你所需要做的仅仅是创建一个 Pyton 文件，其中包含一些合法的 Python 代码，然后再命名为 .py 后缀的文件就行了。不需要什么高级的语法。</p>
+<p>比如说，假设有一个名为 mod.py 的文件，包含下面这些内容：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">s = <span class="string">"If Comrade Napoleon says it, it must be right."</span></span><br><span class="line">a = [<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">(arg)</span>:</span></span><br><span class="line">    print(<span class="string">f'arg = <span class="subst">&#123;arg&#125;</span>'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>其中定义了这些对象：</p>
+<ul>
+<li>s (字符串)</li>
+<li>a (列表)</li>
+<li>foo() (函数)</li>
+<li>Foo (类)</li>
+</ul>
+<p>假设 mod.py 在合适的位置（我们一会就会学到什么是合适的位置），那么这些对象就可以当作模块导入，就像这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>print(mod.s)</span><br><span class="line">If Comrade Napoleon says it, it must be right.</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod.a</span><br><span class="line">[<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod.foo([<span class="string">'quux'</span>, <span class="string">'corge'</span>, <span class="string">'grault'</span>])</span><br><span class="line">arg = [<span class="string">'quux'</span>, <span class="string">'corge'</span>, <span class="string">'grault'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x = mod.Foo()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x</span><br><span class="line">&lt;mod.Foo object at <span class="number">0x03C181F0</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="模块搜索路径"><a href="#模块搜索路径" class="headerlink" title="模块搜索路径"></a>模块搜索路径</h2><p>接着上面的例子，我们看看当 Python 执行这条语句时发生了什么：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> mod</span><br></pre></td></tr></table></figure>
+
+<p>当解释器执行到上面这条 import 语句时，它将在下面这些地方搜索 mod.py 文件：</p>
+<ul>
+<li>当前命令行执行时的路径。</li>
+<li>PYTHONPATH 环境变量中包含的一系列文件夹（如果设置了的话）。PYTHONPATH的格式依赖于操作系统，但是应该模仿PATH环境变量。</li>
+<li>安装Python时配置的与安装相关的目录列表。</li>
+</ul>
+<p>这些搜索路径可以通过 Python 的中 sys 包中的变量 sys.path 中查询到：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> sys</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>sys.path</span><br><span class="line">[<span class="string">''</span>, <span class="string">'C:\\Users\\john\\Documents\\Python\\doc'</span>, <span class="string">'C:\\Python36\\Lib\\idlelib'</span>,</span><br><span class="line"><span class="string">'C:\\Python36\\python36.zip'</span>, <span class="string">'C:\\Python36\\DLLs'</span>, <span class="string">'C:\\Python36\\lib'</span>,</span><br><span class="line"><span class="string">'C:\\Python36'</span>, <span class="string">'C:\\Python36\\lib\\site-packages'</span>]</span><br></pre></td></tr></table></figure>
+
+<p>具体的位置依据安装情况而定，你的信息可能与此不同。</p>
+<p>因此，为了确保的你的模块能被找到，你需要做到下面几个之一：</p>
+<ul>
+<li>把 mod.py 放在与当前命令行环境相同的文件夹下。</li>
+<li>更改 PYTHONPATH，将 mod.py 所在文件夹路径放入其中，然后重启解释器。</li>
+<li>把 mod.py 放到安装目录其中之一。</li>
+</ul>
+<p>实际上还有一个方法：你可以把模块文件放在任何地方，然后在运行时修改 sys.path。例如，这个例子中，你可以把 mod.py 放在 C:\Users\john，然后执行下面的语句：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>sys.path.append(<span class="string">r'C:\Users\john'</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>sys.path</span><br><span class="line">[<span class="string">''</span>, <span class="string">'C:\\Users\\john\\Documents\\Python\\doc'</span>, <span class="string">'C:\\Python36\\Lib\\idlelib'</span>,</span><br><span class="line"><span class="string">'C:\\Python36\\python36.zip'</span>, <span class="string">'C:\\Python36\\DLLs'</span>, <span class="string">'C:\\Python36\\lib'</span>,</span><br><span class="line"><span class="string">'C:\\Python36'</span>, <span class="string">'C:\\Python36\\lib\\site-packages'</span>, <span class="string">'C:\\Users\\john'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod</span><br></pre></td></tr></table></figure>
+
+<p>一旦一个模块被成功导入，那么你就能通过模块的 <strong>file</strong> 属性找到它的位置：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod.__file__</span><br><span class="line"><span class="string">'C:\\Users\\john\\mod.py'</span></span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> re</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>re.__file__</span><br><span class="line"><span class="string">'C:\\Python36\\lib\\re.py'</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>file</strong> 的目录应该是存在于 sys.path 中的。</p>
+<h2 id="import-语句"><a href="#import-语句" class="headerlink" title="import 语句"></a>import 语句</h2><p>通过import语句，调用者可以使用模块内容。import语句有多种不同的形式，如下所示。</p>
+<h3 id="import-lt-模块名-gt"><a href="#import-lt-模块名-gt" class="headerlink" title="import &lt;模块名&gt;"></a>import &lt;模块名&gt;</h3><p>这是最简单的一种方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &lt;模块名&gt;</span><br></pre></td></tr></table></figure>
+
+<p>注意，这并不能使调用者直接访问模块内容。每个模块都有自己的私有符号表(private symbol table)，它作为模块中定义的所有对象的全局符号表。因此，一个模块会创建一个独立的命名空间，就像之前说的那样。</p>
+<p>import &lt;模块名&gt; 这条语句只是把 &lt;模块名&gt; 放在了调用者的符号表中。模块中定义的对象仍然处于模块的私有符号表中。</p>
+<p>对于调用者来说，模块中的对象只能通过 &lt;模块名&gt; 加上 . 后缀才能调用。如下所示。</p>
+<p>在 import 语句之后，<strong><em>mod</em></strong> 在调用者的上下文中就有了意义：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod</span><br><span class="line">&lt;module <span class="string">'mod'</span> <span class="keyword">from</span> <span class="string">'C:\\Users\\john\\Documents\\Python\\doc\\mod.py'</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>但是对于 mod 中的 s 和 foo 来说，它们仍然在模块的私有符号表中，在当前上下文中是没有意义的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>s</span><br><span class="line">NameError: name <span class="string">'s'</span> <span class="keyword">is</span> <span class="keyword">not</span> defined</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>foo(<span class="string">'quux'</span>)</span><br><span class="line">NameError: name <span class="string">'foo'</span> <span class="keyword">is</span> <span class="keyword">not</span> defined</span><br></pre></td></tr></table></figure>
+
+<p>为了在当前上下文中使用，模块中定义的对象名必须加上 mod 前缀：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod.s</span><br><span class="line"><span class="string">'If Comrade Napoleon says it, it must be right.'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod.foo(<span class="string">'quux'</span>)</span><br><span class="line">arg = quux</span><br></pre></td></tr></table></figure>
+
+<p>可以在一个import语句中导入多个模块，中间使用逗号隔开：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &lt;模块名&gt;[, &lt;模块名&gt; ...]</span><br></pre></td></tr></table></figure>
+
+<h3 id="from-lt-模块名-gt-import-lt-对象名称-gt"><a href="#from-lt-模块名-gt-import-lt-对象名称-gt" class="headerlink" title="from &lt;模块名&gt; import &lt;对象名称&gt;"></a>from &lt;模块名&gt; import &lt;对象名称&gt;</h3><p>还有一种方法是直接从模块中取出独立的对象，导入到调用者的符号表里面：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> &lt;模块名&gt; <span class="keyword">import</span> &lt;对象名称&gt;</span><br></pre></td></tr></table></figure>
+
+<p>在下面的语句中，&lt;对象名称&gt; 可以直接在调用者的环境中使用，不用添加 &lt;模块名&gt; 前缀：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> mod <span class="keyword">import</span> s, foo</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>s</span><br><span class="line"><span class="string">'If Comrade Napoleon says it, it must be right.'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>foo(<span class="string">'quux'</span>)</span><br><span class="line">arg = quux</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> mod <span class="keyword">import</span> Foo</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x = Foo()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x</span><br><span class="line">&lt;mod.Foo object at <span class="number">0x02E3AD50</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>由于这种方法会将对象直接放在调用者的符号表中，因此同名的对象将会被覆盖：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = [<span class="string">'foo'</span>, <span class="string">'bar'</span>, <span class="string">'baz'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a</span><br><span class="line">[<span class="string">'foo'</span>, <span class="string">'bar'</span>, <span class="string">'baz'</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> mod <span class="keyword">import</span> a</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a</span><br><span class="line">[<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br></pre></td></tr></table></figure>
+
+<p>甚至可以直接从模块中导入全部的内容：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> &lt;module_name&gt; <span class="keyword">import</span> *</span><br></pre></td></tr></table></figure>
+
+<p>这将会把模块中的全部对象都导入到本地符号表中，但是以下划线（_）开头的字符除外。</p>
+<p>例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> mod <span class="keyword">import</span> *</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>s</span><br><span class="line"><span class="string">'If Comrade Napoleon says it, it must be right.'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a</span><br><span class="line">[<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>foo</span><br><span class="line">&lt;function foo at <span class="number">0x03B449C0</span>&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>Foo</span><br><span class="line">&lt;<span class="class"><span class="keyword">class</span> '<span class="title">mod</span>.<span class="title">Foo</span>'&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在大规模生产代码中并不推荐这样做。这有点危险，因为你是在将名称全部输入到本地符号表中。除非你非常了解它们，并且确信不会发生冲突，否则您很有可能会不小心覆盖现有的名称。但是，当你在 Python 解释器中做一些操作，例如测试或者学习时，这种方法很方便，直接导入全部，不用输入太多字符。</p>
+<h3 id="from-lt-模块名-gt-import-lt-对象名称-gt-as-lt-别名-gt"><a href="#from-lt-模块名-gt-import-lt-对象名称-gt-as-lt-别名-gt" class="headerlink" title="from &lt;模块名&gt; import &lt;对象名称&gt; as &lt;别名&gt;"></a>from &lt;模块名&gt; import &lt;对象名称&gt; as &lt;别名&gt;</h3><p>在将单独的对象从模块中导入本地符号表的同时，可以给它们起个别名：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> &lt;模块名&gt; <span class="keyword">import</span> &lt;对象名称&gt; <span class="keyword">as</span> &lt;别名&gt; [, &lt;对象名称&gt; <span class="keyword">as</span> &lt;别名&gt;...]</span><br></pre></td></tr></table></figure>
+
+<p>在上个例子中，直接导入可能会导致名称冲突，如果使用这种方法就可以解决这个问题：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>s = <span class="string">'foo'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = [<span class="string">'foo'</span>, <span class="string">'bar'</span>, <span class="string">'baz'</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> mod <span class="keyword">import</span> s <span class="keyword">as</span> string, a <span class="keyword">as</span> alist</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>s</span><br><span class="line"><span class="string">'foo'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>string</span><br><span class="line"><span class="string">'If Comrade Napoleon says it, it must be right.'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a</span><br><span class="line">[<span class="string">'foo'</span>, <span class="string">'bar'</span>, <span class="string">'baz'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>alist</span><br><span class="line">[<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br></pre></td></tr></table></figure>
+
+<h3 id="import-lt-模块名-gt-as-lt-别名-gt"><a href="#import-lt-模块名-gt-as-lt-别名-gt" class="headerlink" title="import &lt;模块名&gt; as &lt;别名&gt;"></a>import &lt;模块名&gt; as &lt;别名&gt;</h3><p>也可以直接导入整个模块并给它起个别名：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &lt;模块名&gt; <span class="keyword">as</span> &lt;别名&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod <span class="keyword">as</span> my_module</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>my_module.a</span><br><span class="line">[<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>my_module.foo(<span class="string">'qux'</span>)</span><br><span class="line">arg = qux</span><br></pre></td></tr></table></figure>
+
+<p>模块内容可以从函数定义中导入。在这种情况下，直到调用函数时才会进行导入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">bar</span><span class="params">()</span>:</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">from</span> mod <span class="keyword">import</span> foo</span><br><span class="line"><span class="meta">... </span>    foo(<span class="string">'corge'</span>)</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>bar()</span><br><span class="line">arg = corge</span><br></pre></td></tr></table></figure>
+
+<p>但是，Python 3 不支持在函数中使用 import * 语法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">bar</span><span class="params">()</span>:</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">from</span> mod <span class="keyword">import</span> *</span><br><span class="line">...</span><br><span class="line">SyntaxError: <span class="keyword">import</span> * only allowed at module level</span><br></pre></td></tr></table></figure>
+
+<p>最后，import 语句也可以使用 try except 异常处理模式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">try</span>:</span><br><span class="line"><span class="meta">... </span>    <span class="comment"># Non-existent module</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">import</span> baz</span><br><span class="line"><span class="meta">... </span><span class="keyword">except</span> ImportError:</span><br><span class="line"><span class="meta">... </span>    print(<span class="string">'Module not found'</span>)</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">Module <span class="keyword">not</span> found</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">try</span>:</span><br><span class="line"><span class="meta">... </span>    <span class="comment"># Existing module, but non-existent object</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">from</span> mod <span class="keyword">import</span> baz</span><br><span class="line"><span class="meta">... </span><span class="keyword">except</span> ImportError:</span><br><span class="line"><span class="meta">... </span>    print(<span class="string">'Object not found in module'</span>)</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">Object <span class="keyword">not</span> found <span class="keyword">in</span> module</span><br></pre></td></tr></table></figure>
+
+<h2 id="dir-函数"><a href="#dir-函数" class="headerlink" title="dir() 函数"></a>dir() 函数</h2><p>内置函数dir()返回命名空间中定义的名称列表。如果没有参数，它将在当前本地符号表（local symbol table）中生成一个按字母顺序排序的名称列表：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>qux = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>, <span class="string">'qux'</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="class"><span class="keyword">class</span> <span class="title">Bar</span><span class="params">()</span>:</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">pass</span></span><br><span class="line">...</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x = Bar()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'Bar'</span>, <span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>, <span class="string">'qux'</span>, <span class="string">'x'</span>]</span><br></pre></td></tr></table></figure>
+
+<p>注意，上面对dir()的第一次调用列出了几个自动定义的名称，这些名称在解释器启动时已经在命名空间中了。当定义了新的名称(qux、Bar、x)时，它们会出现在对dir()的后续调用中。</p>
+<p>这对于确定import语句向命名空间添加了什么内容非常有用:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>, <span class="string">'mod'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod.s</span><br><span class="line"><span class="string">'If Comrade Napoleon says it, it must be right.'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod.foo([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>])</span><br><span class="line">arg = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> mod <span class="keyword">import</span> a, Foo</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'Foo'</span>, <span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>, <span class="string">'a'</span>, <span class="string">'mod'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a</span><br><span class="line">[<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x = Foo()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x</span><br><span class="line">&lt;mod.Foo object at <span class="number">0x002EAD50</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> mod <span class="keyword">import</span> s <span class="keyword">as</span> string</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'Foo'</span>, <span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>, <span class="string">'a'</span>, <span class="string">'mod'</span>, <span class="string">'string'</span>, <span class="string">'x'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>string</span><br><span class="line"><span class="string">'If Comrade Napoleon says it, it must be right.'</span></span><br></pre></td></tr></table></figure>
+
+<p>当给出模块名称的参数时，dir()将列出在模块中定义的名称：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir(mod)</span><br><span class="line">[<span class="string">'Foo'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__cached__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__file__'</span>, <span class="string">'__loader__'</span>,</span><br><span class="line"><span class="string">'__name__'</span>, <span class="string">'__package__'</span>, <span class="string">'__spec__'</span>, <span class="string">'a'</span>, <span class="string">'foo'</span>, <span class="string">'s'</span>]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> mod <span class="keyword">import</span> *</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'Foo'</span>, <span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>, <span class="string">'a'</span>, <span class="string">'foo'</span>, <span class="string">'s'</span>]</span><br></pre></td></tr></table></figure>
+
+<h2 id="将模块作为脚本执行"><a href="#将模块作为脚本执行" class="headerlink" title="将模块作为脚本执行"></a>将模块作为脚本执行</h2><p>任何包含模块的.py文件本质上也是Python脚本，没有任何理由不能像Python脚本那样执行它。</p>
+<p>这里仍然是上面定义的 mod.py：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">s = <span class="string">"If Comrade Napoleon says it, it must be right."</span></span><br><span class="line">a = [<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">(arg)</span>:</span></span><br><span class="line">    print(<span class="string">f'arg = <span class="subst">&#123;arg&#125;</span>'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>这可以作为脚本运行：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\john\Documents&gt;python mod.py</span><br><span class="line">C:\Users\john\Documents&gt;</span><br></pre></td></tr></table></figure>
+
+<p>没有错误，所以它显然是有效的。当然，这没啥意思。在编写过程中，它只定义对象。它不会对它们做任何事情，也不会生成任何输出。</p>
+<p>让我们修改上面的Python模块，使其在作为脚本运行时确实生成一些输出：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">s = <span class="string">"If Comrade Napoleon says it, it must be right."</span></span><br><span class="line">a = [<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">(arg)</span>:</span></span><br><span class="line">    print(<span class="string">f'arg = <span class="subst">&#123;arg&#125;</span>'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">print(s)</span><br><span class="line">print(a)</span><br><span class="line">foo(<span class="string">'quux'</span>)</span><br><span class="line">x = Foo()</span><br><span class="line">print(x)</span><br></pre></td></tr></table></figure>
+
+<p>现在看起来就有意思多了：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\john\Documents&gt;python mod.py</span><br><span class="line"><span class="keyword">If</span> Comrade Napoleon says it, it must be right.</span><br><span class="line">[<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line">arg = quux</span><br><span class="line">&lt;__main__.Foo object at <span class="number">0</span>x02F101D0&gt;</span><br></pre></td></tr></table></figure>
+
+<p>不幸的是，现在它还会在作为模块导入时生成输出：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod</span><br><span class="line">If Comrade Napoleon says it, it must be right.</span><br><span class="line">[<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line">arg = quux</span><br><span class="line">&lt;mod.Foo object at <span class="number">0x0169AD50</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这可能不是你想要的。模块在导入时生成输出并不常见。</p>
+<p>如果你能够区分文件何时作为模块加载，何时作为独立脚本运行，这不是更好吗？</p>
+<p>当然可以！</p>
+<p>当将 .py 文件作为模块导入时，Python 将特殊的变量 <strong>name</strong> 设置为模块的名称。但是，如果一个文件作为独立脚本运行，文件名就会被设置为字符串 <strong>main</strong> 。基于这个原理，你就可以在运行时判断当前是处于哪种情况了：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">s = <span class="string">"If Comrade Napoleon says it, it must be right."</span></span><br><span class="line">a = [<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">(arg)</span>:</span></span><br><span class="line">    print(<span class="string">f'arg = <span class="subst">&#123;arg&#125;</span>'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (__name__ == <span class="string">'__main__'</span>):</span><br><span class="line">    print(<span class="string">'Executing as standalone script'</span>)</span><br><span class="line">    print(s)</span><br><span class="line">    print(a)</span><br><span class="line">    foo(<span class="string">'quux'</span>)</span><br><span class="line">    x = Foo()</span><br><span class="line">    print(x)</span><br></pre></td></tr></table></figure>
+
+<p>现在，重新运行脚本，输出：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\john\Documents&gt;python mod.py</span><br><span class="line">Executing as standalone script</span><br><span class="line"><span class="keyword">If</span> Comrade Napoleon says it, it must be right.</span><br><span class="line">[<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line">arg = quux</span><br><span class="line">&lt;__main__.Foo object at <span class="number">0</span>x03450690&gt;</span><br></pre></td></tr></table></figure>
+
+<p>但是如果作为模块导入的话：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod.foo(<span class="string">'grault'</span>)</span><br><span class="line">arg = grault</span><br></pre></td></tr></table></figure>
+
+<p>为了测试模块中包含的功能，模块通常被设计为具有作为独立脚本运行的能力，这样方便单元测试。例如，假设你创建了一个包含阶乘函数的模块 fact.py ，如下所示：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">fact</span><span class="params">(n)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span> <span class="keyword">if</span> n == <span class="number">1</span> <span class="keyword">else</span> n * fact(n<span class="number">-1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (__name__ == <span class="string">'__main__'</span>):</span><br><span class="line">    <span class="keyword">import</span> sys</span><br><span class="line">    <span class="keyword">if</span> len(sys.argv) &gt; <span class="number">1</span>:</span><br><span class="line">        print(fact(int(sys.argv[<span class="number">1</span>])))</span><br></pre></td></tr></table></figure>
+
+<p>可以将该文件视为一个模块，并导入 fact() 函数：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> fact <span class="keyword">import</span> fact</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fact(<span class="number">6</span>)</span><br><span class="line"><span class="number">720</span></span><br></pre></td></tr></table></figure>
+
+<p>但是也可以通过在命令行上传递一个整数参数来独立运行它，以便进行测试：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\john\Documents&gt;python fact.py <span class="number">6</span></span><br><span class="line"><span class="number">720</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="重新加载模块"><a href="#重新加载模块" class="headerlink" title="重新加载模块"></a>重新加载模块</h2><p>处于效率的原因，每个解释器会话只会加载一次模块。这对于函数和类的定义来说说没问题的，它们通常也是模块中的大部分内容。但是模块也可以包含可执行语句，通常用于初始化。要注意到这些语句只会在第一次导入模块时执行。</p>
+<p>考虑下面的文件 mod.py：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">a = [<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line">print(<span class="string">'a ='</span>, a)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod</span><br><span class="line">a = [<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod.a</span><br><span class="line">[<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br></pre></td></tr></table></figure>
+
+<p>在后续的导入中没有执行 print() 语句。如果对模块进行了更改，并且需要重新加载它，那么需要重新启动解释器，或者使用模块 importlib 中名为 reload() 的函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod</span><br><span class="line">a = [<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> mod</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> importlib</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>importlib.reload(mod)</span><br><span class="line">a = [<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]</span><br><span class="line">&lt;module <span class="string">'mod'</span> <span class="keyword">from</span> <span class="string">'C:\\Users\\john\\Documents\\Python\\doc\\mod.py'</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Python-包（Packages）"><a href="#Python-包（Packages）" class="headerlink" title="Python 包（Packages）"></a>Python 包（Packages）</h2><p>假设你开发了一个包含许多模块的大型应用程序。随着模块数量的增长，如果将它们全部放在一个位置，就很难跟踪它们。如果它们具有相似的名称或功能，则尤其如此。您可能希望有一种对它们进行分组和组织的方法。</p>
+<p>包允许使用 “.” 对模块命名空间进行分层结构。就像模块帮助避免全局变量名之间的冲突一样，包帮助避免模块名之间的冲突。</p>
+<p>创建一个包非常简单，因为它利用了操作系统固有的层次文件结构。考虑以下结构：</p>
+<p><img src="https://files.realpython.com/media/pkg1.9af1c7aea48f.png" alt=""></p>
+<p>这里有一个名为 pkg 的目录，它包含两个模块，mod1.py 和mod2.py。模块的内容是：</p>
+<p>mod1.py:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'[mod1] foo()'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>mod2.py:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">bar</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'[mod2] bar()'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Bar</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>对于这种结构，如果 pkg 目录存在于能够被找到的位置(在 sys.path 中包含的一个目录中)，那么就可以使用点符号引用这两个模块(pkg.mod1, pkg.mod2)，并使用你已经熟悉的语法导入它们：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &lt;模块名&gt;[, &lt;模块名&gt; ...]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> pkg.mod1, pkg.mod2</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pkg.mod1.foo()</span><br><span class="line">[mod1] foo()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x = pkg.mod2.Bar()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x</span><br><span class="line">&lt;pkg.mod2.Bar object at <span class="number">0x033F7290</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> &lt;模块名&gt; <span class="keyword">import</span> &lt;对象名&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg.mod1 <span class="keyword">import</span> foo</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>foo()</span><br><span class="line">[mod1] foo()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> &lt;模块名&gt; <span class="keyword">import</span> &lt;对象名&gt; <span class="keyword">as</span> &lt;别名&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg.mod2 <span class="keyword">import</span> Bar <span class="keyword">as</span> Qux</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x = Qux()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x</span><br><span class="line">&lt;pkg.mod2.Bar object at <span class="number">0x036DFFD0</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>也可以使用这些语句导入模块：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> &lt;包名&gt; <span class="keyword">import</span> &lt;模块名&gt;[, &lt;模块名&gt; ...]</span><br><span class="line"><span class="keyword">from</span> &lt;包名&gt; <span class="keyword">import</span> &lt;模块名&gt; <span class="keyword">as</span> &lt;别名&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg <span class="keyword">import</span> mod1</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod1.foo()</span><br><span class="line">[mod1] foo()</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg <span class="keyword">import</span> mod2 <span class="keyword">as</span> quux</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>quux.bar()</span><br><span class="line">[mod2] bar()</span><br></pre></td></tr></table></figure>
+
+<p>也可以直接导入包名：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> pkg</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pkg</span><br><span class="line">&lt;module <span class="string">'pkg'</span> (namespace)&gt;</span><br></pre></td></tr></table></figure>
+
+<p>但这收效甚微。虽然严格地说，这是一个语法正确的Python语句，但它没有做任何有用的事情。特别是，它没有将pkg中的任何模块放到本地命名空间中</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>pkg.mod1</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"&lt;pyshell#34&gt;"</span>, line <span class="number">1</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">    pkg.mod1</span><br><span class="line">AttributeError: module <span class="string">'pkg'</span> has no attribute <span class="string">'mod1'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pkg.mod1.foo()</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"&lt;pyshell#35&gt;"</span>, line <span class="number">1</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">    pkg.mod1.foo()</span><br><span class="line">AttributeError: module <span class="string">'pkg'</span> has no attribute <span class="string">'mod1'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pkg.mod2.Bar()</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"&lt;pyshell#36&gt;"</span>, line <span class="number">1</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">    pkg.mod2.Bar()</span><br><span class="line">AttributeError: module <span class="string">'pkg'</span> has no attribute <span class="string">'mod2'</span></span><br></pre></td></tr></table></figure>
+
+<p>所以说还是应该使用上面的几种方法。</p>
+<h2 id="包初始化（Package-Initialization）"><a href="#包初始化（Package-Initialization）" class="headerlink" title="包初始化（Package Initialization）"></a>包初始化（Package Initialization）</h2><p>如果包目录中存在名为 _<em>init_</em>.py 的文件，则在导入包或包中的模块时会调用该文件。这可以用于执行包初始化代码，比如初始化包级数据。</p>
+<p>例如，考虑下面的 _<em>init_</em>.py 文件：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(<span class="string">f'Invoking __init__.py for <span class="subst">&#123;__name__&#125;</span>'</span>)</span><br><span class="line">A = [<span class="string">'quux'</span>, <span class="string">'corge'</span>, <span class="string">'grault'</span>]</span><br></pre></td></tr></table></figure>
+
+<p>把这个文件加到之前所定义的包中去：</p>
+<p><img src="https://files.realpython.com/media/pkg2.dab97c2f9c58.png" alt=""></p>
+<p>现在，当包被导入时，全局列表 A 就会被初始化：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> pkg</span><br><span class="line">Invoking \__init__.py <span class="keyword">for</span> pkg</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pkg.A</span><br><span class="line">[<span class="string">'quux'</span>, <span class="string">'corge'</span>, <span class="string">'grault'</span>]</span><br></pre></td></tr></table></figure>
+
+<p>包中的模块可以通过依次导入全局变量来访问它:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">from</span> pkg <span class="keyword">import</span> A</span><br><span class="line">    print(<span class="string">'[mod1] foo() / A = '</span>, A)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg <span class="keyword">import</span> mod1</span><br><span class="line">Invoking __init__.py <span class="keyword">for</span> pkg</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod1.foo()</span><br><span class="line">[mod1] foo() / A =  [<span class="string">'quux'</span>, <span class="string">'corge'</span>, <span class="string">'grault'</span>]</span><br></pre></td></tr></table></figure>
+
+<p>_<em>init_</em>.py 还可以被用于自动从包中导入模块。比如说，就像前面看到的 import pkg 语句，只是将 pkg 这个名字导入了调用者的本地符号表中，但是实际上并没有导入任何模块。但是如果 pkg 包中的 _<em>init_</em>.py 文件包含了下面的内容：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(<span class="string">f'Invoking __init__.py for <span class="subst">&#123;__name__&#125;</span>'</span>)</span><br><span class="line"><span class="keyword">import</span> pkg.mod1, pkg.mod2</span><br></pre></td></tr></table></figure>
+
+<p>这样，当你执行 import pkg 的时候，mod1 和 mod2 模块就会被自动导入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> pkg</span><br><span class="line">Invoking __init__.py <span class="keyword">for</span> pkg</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pkg.mod1.foo()</span><br><span class="line">[mod1] foo()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pkg.mod2.bar()</span><br><span class="line">[mod2] bar()</span><br></pre></td></tr></table></figure>
+
+<p>注意：大多数 Python 文档都指出，在创建包时，包目录中必须有_<em>init_</em>.py文件。以前确实需要这样。在过去，_<em>init_</em>.py 的出现就意味着 Python 正在定义一个包。该文件可以包含初始化代码，甚至可以为空，但必须存在。从 Python 3.3开始，引入了<a href="https://www.python.org/dev/peps/pep-0420/" target="_blank" rel="noopener">隐式命名空间包</a>。这允许创建一个没有任何 _<em>init_</em>.py 文件的包。当然，如果需要对包进行初始化，它仍然可以出现。但现在已经不是必需的了。</p>
+<h2 id="从包中导入"><a href="#从包中导入" class="headerlink" title="从包中导入 *"></a>从包中导入 *</h2><p>为了讨论下面的部分，之前定义的包现在包含了一些额外的文件：</p>
+<p><img src="https://files.realpython.com/media/pkg3.d2160908ae77.png" alt=""></p>
+<p>现在 pkg 包中定义了四个模块，内容如下：</p>
+<p>mod1.py:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'[mod1] foo()'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>mod2.py:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">bar</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'[mod2] bar()'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Bar</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>mod3.py:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">baz</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'[mod3] baz()'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Baz</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>mod4.py:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">qux</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'[mod4] qux()'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Qux</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>之前已经看到，当对于模块 import * 的时候，模块中的所有对象都会被导入到本地符号表中，除了以下划线开头的对象，就像之前一样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg.mod3 <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'Baz'</span>, <span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>, <span class="string">'baz'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>baz()</span><br><span class="line">[mod3] baz()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>Baz</span><br><span class="line">&lt;<span class="class"><span class="keyword">class</span> '<span class="title">pkg</span>.<span class="title">mod3</span>.<span class="title">Baz</span>'&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>对于包来说，类似的语句：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> &lt;包名&gt; <span class="keyword">import</span> *</span><br></pre></td></tr></table></figure>
+
+<p>这会发生什么？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg <span class="keyword">import</span> *</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>]</span><br></pre></td></tr></table></figure>
+
+<p>没啥变化，你可能会想着这个操作会把包中的所有模块都给导入进来。但是实际上并没有。</p>
+<p>相反，Python 遵循这个约定：如果包目录中的 _<em>init_</em>.py 文件包含一个名为 _<em>all_</em> 的列表，那么它就被认为是在遇到 from &lt;包名&gt; import * 语句时应该导入的模块列表。</p>
+<p>pkg/_<em>init_</em>.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">__all__ = [</span><br><span class="line">        <span class="string">'mod1'</span>,</span><br><span class="line">        <span class="string">'mod2'</span>,</span><br><span class="line">        <span class="string">'mod3'</span>,</span><br><span class="line">        <span class="string">'mod4'</span></span><br><span class="line">        ]</span><br></pre></td></tr></table></figure>
+
+<p>现在，通过 from pkg import * 会导入所有四个模块：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg <span class="keyword">import</span> *</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>, <span class="string">'mod1'</span>, <span class="string">'mod2'</span>, <span class="string">'mod3'</span>, <span class="string">'mod4'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod2.bar()</span><br><span class="line">[mod2] bar()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod4.Qux</span><br><span class="line">&lt;<span class="class"><span class="keyword">class</span> '<span class="title">pkg</span>.<span class="title">mod4</span>.<span class="title">Qux</span>'&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>对于包和模块来说，使用 import * 仍然不是很好的形式。但是，这个功能至少让包的创建者能够控制指定 import * 时发生的事情。</p>
+<p>还有一点，_<em>all_</em> 也可以在模块中定义，目的也是一样：用来控制 import * 可以导入的内容。例如，把 mod1.py 改成：</p>
+<p>pkg/mod1.py:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">__all__ = [<span class="string">'foo'</span>]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'[mod1] foo()'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>现在，使用 from pkg.mod1 import * 语句只会导入 _<em>all_</em> 中定义的内容：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg.mod1 <span class="keyword">import</span> *</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dir()</span><br><span class="line">[<span class="string">'__annotations__'</span>, <span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__loader__'</span>, <span class="string">'__name__'</span>,</span><br><span class="line"><span class="string">'__package__'</span>, <span class="string">'__spec__'</span>, <span class="string">'foo'</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>foo()</span><br><span class="line">[mod1] foo()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>Foo</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"&lt;pyshell#37&gt;"</span>, line <span class="number">1</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">    Foo</span><br><span class="line">NameError: name <span class="string">'Foo'</span> <span class="keyword">is</span> <span class="keyword">not</span> defined</span><br></pre></td></tr></table></figure>
+
+<p>foo() 被导入到了本地命名空间中，而 Foo 却没有，因为后者没有存在于 _<em>all_</em> 中。</p>
+<p>总结来说，包和模块都可以使用 _<em>all_</em> 来决定当使用 import * 时可以导入哪些内容。但是默认行为有些许不同：</p>
+<ul>
+<li>对于包来说，如果 _<em>all_</em> 没有定义，那么 import * 什么都不导入</li>
+<li>对于模块来说，如果 _<em>all_</em> 没有定义，那么 import * 会导入所有内容（当然除了以下划线开头的内容）</li>
+</ul>
+<h2 id="子包（Subpackages）"><a href="#子包（Subpackages）" class="headerlink" title="子包（Subpackages）"></a>子包（Subpackages）</h2><p>包可以包含任意深度的嵌套子包。例如，让我们对示例包目录进行如下修改：</p>
+<p><img src="https://files.realpython.com/media/pkg4.a830d6e144bf.png" alt=""></p>
+<p>如此定义了四个模块，它们被分到了两个子包中，sub_pkg1 与 sub_pkg2</p>
+<p>导入仍然能够正常工作。语法也是类似的，但是需要额外的 “.” 来把包名和子包名分开：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> pkg.sub_pkg1.mod1</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pkg.sub_pkg1.mod1.foo()</span><br><span class="line">[mod1] foo()</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg.sub_pkg1 <span class="keyword">import</span> mod2</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod2.bar()</span><br><span class="line">[mod2] bar()</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg.sub_pkg2.mod3 <span class="keyword">import</span> baz</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>baz()</span><br><span class="line">[mod3] baz()</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg.sub_pkg2.mod4 <span class="keyword">import</span> qux <span class="keyword">as</span> grault</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>grault()</span><br><span class="line">[mod4] qux()</span><br></pre></td></tr></table></figure>
+
+<p>此外，一个子包中的模块可以引用同级子包中的对象。例如，你想在 mod3 中执行 foo() 函数（位于 mod1 模块中），可以使用绝对路径导入：</p>
+<p>pkg/sub_pkg/mod3.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">baz</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'[mod3] baz()'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Baz</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pkg.sub_pkg1.mod1 <span class="keyword">import</span> foo</span><br><span class="line">foo()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg.sub_pkg2 <span class="keyword">import</span> mod3</span><br><span class="line">[mod1] foo()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mod3.foo()</span><br><span class="line">[mod1] foo()</span><br></pre></td></tr></table></figure>
+
+<p>或者你也可以使用相对路径导入，其中 .. 代表的是上一层目录。对于 mod3.py 来说，它在 sub_pkg2 中</p>
+<ul>
+<li>.. 指的是父包（pkg）</li>
+<li>..sub_pkg1 指的是父包中的 sub_pkg1 子包</li>
+</ul>
+<p>pkg/sub_pkg2/mod3.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">baz</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'[mod3] baz()'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Baz</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> .. <span class="keyword">import</span> sub_pkg1</span><br><span class="line">print(sub_pkg1)</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> ..sub_pkg1.mod1 <span class="keyword">import</span> foo</span><br><span class="line">foo()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> pkg.sub_pkg2 <span class="keyword">import</span> mod3</span><br><span class="line">&lt;module <span class="string">'pkg.sub_pkg1'</span> (namespace)&gt;</span><br><span class="line">[mod1] foo()</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这篇文章中，我们学到了这些内容：</p>
+<ul>
+<li>如何创建 Python 模块</li>
+<li>Python 解释器搜索模块的目录</li>
+<li>如何使用 import 语句来获取模块中定义的对象</li>
+<li>如何创建一个模块，其可执行作为一个独立的脚本</li>
+<li>如何组织模块到包和子包中</li>
+<li>如何控制包初始化</li>
+</ul>
+<p>这将使你更好地理解如何访问Python中许多第三方和内置模块中可用的功能。</p>
+<p>此外，如果你正在开发自己的应用程序，那么创建自己的模块和包将帮助您组织和模块化代码，从而简化编码、维护和调试。</p>
+<p>如果还想深入学习，可以看看 Python 官方文档中的相关内容：</p>
+<ul>
+<li><a href="https://docs.python.org/3/reference/import.html" target="_blank" rel="noopener">The import system</a></li>
+<li><a href="https://docs.python.org/3/tutorial/modules.html" target="_blank" rel="noopener">The Python tutorial: Modules</a></li>
+</ul>
+<p>尽情享受 Python 吧！</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Python/" rel="tag"># Python</a>
+              <a href="/tags/%E8%AF%91%E6%96%87/" rel="tag"># 译文</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/06/29/WETH%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/" rel="prev" title="WETH 源码剖析">
+      <i class="fa fa-chevron-left"></i> WETH 源码剖析
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python-模块（Modules）：概述"><span class="nav-text">Python 模块（Modules）：概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模块搜索路径"><span class="nav-text">模块搜索路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#import-语句"><span class="nav-text">import 语句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#import-lt-模块名-gt"><span class="nav-text">import &lt;模块名&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#from-lt-模块名-gt-import-lt-对象名称-gt"><span class="nav-text">from &lt;模块名&gt; import &lt;对象名称&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#from-lt-模块名-gt-import-lt-对象名称-gt-as-lt-别名-gt"><span class="nav-text">from &lt;模块名&gt; import &lt;对象名称&gt; as &lt;别名&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#import-lt-模块名-gt-as-lt-别名-gt"><span class="nav-text">import &lt;模块名&gt; as &lt;别名&gt;</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dir-函数"><span class="nav-text">dir() 函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#将模块作为脚本执行"><span class="nav-text">将模块作为脚本执行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重新加载模块"><span class="nav-text">重新加载模块</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python-包（Packages）"><span class="nav-text">Python 包（Packages）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#包初始化（Package-Initialization）"><span class="nav-text">包初始化（Package Initialization）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从包中导入"><span class="nav-text">从包中导入 *</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#子包（Subpackages）"><span class="nav-text">子包（Subpackages）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="PolarSpace"
+      src="/images/myhead.jpeg">
+  <p class="site-author-name" itemprop="name">PolarSpace</p>
+  <div class="site-description" itemprop="description">登峰造极境</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="gray">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">PolarSpace</span>
+</div>
+  <!--<div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

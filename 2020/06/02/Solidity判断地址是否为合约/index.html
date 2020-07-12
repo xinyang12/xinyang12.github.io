@@ -31,7 +31,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200602234119.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200602234300.png">
 <meta property="article:published_time" content="2020-06-02T11:58:24.000Z">
-<meta property="article:modified_time" content="2020-06-02T15:57:04.879Z">
+<meta property="article:modified_time" content="2020-06-29T14:09:27.152Z">
 <meta property="article:author" content="PolarSpace">
 <meta property="article:tag" content="Solidity">
 <meta name="twitter:card" content="summary">
@@ -193,10 +193,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-06-02 19:58:24 / 修改时间：23:57:04" itemprop="dateCreated datePublished" datetime="2020-06-02T19:58:24+08:00">2020-06-02</time>
+              <time title="创建时间：2020-06-02 19:58:24" itemprop="dateCreated datePublished" datetime="2020-06-02T19:58:24+08:00">2020-06-02</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-29 22:09:27" itemprop="dateModified" datetime="2020-06-29T22:09:27+08:00">2020-06-29</time>
+              </span>
 
           
 
@@ -212,12 +218,12 @@
         <h3 id="EXTCODESIZE"><a href="#EXTCODESIZE" class="headerlink" title="EXTCODESIZE"></a>EXTCODESIZE</h3><p>在 Solidity 中，有时需要判断地址是否为合约地址，常用的一种方法是使用比较底层的汇编操作码，将其嵌套在 Solidity 合约之中，具体实现如下：</p>
 <a id="more"></a>
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">function isContract(address _addr) private </span><br><span class="line">    returns (bool isContract)&#123;</span><br><span class="line">    uint32 size;</span><br><span class="line">    assembly &#123;</span><br><span class="line">        size :&#x3D; extcodesize(_addr)</span><br><span class="line">    &#125;</span><br><span class="line">    return (size &gt; 0);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">isContract</span>(<span class="params">address _addr</span>) <span class="title">private</span> </span></span><br><span class="line"><span class="function">    <span class="title">returns</span> (<span class="params">bool isContract</span>)</span>&#123;</span><br><span class="line">    uint32 size;</span><br><span class="line">    assembly &#123;</span><br><span class="line">        size := extcodesize(_addr)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> (size &gt; <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>这里使用到了 EXTCODESIZE 操作码，它会返回一个地址中代码的大小。我们知道代码只存在于合约之中，因此如果结果大于 0 就说明该地址是合约，否则是 EOA (External Owned Account)。</p>
 <p>这里需要注意的是，在合约的构造函数中调用 EXTCODESIZE 会返回 0，也就是说在构造函数中判断是否为合约会返回 false</p>
 <p>来看一个例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity 0.6.0;</span><br><span class="line"></span><br><span class="line">contract TestIsContract &#123;</span><br><span class="line">    </span><br><span class="line">    event Test(bool isContract);</span><br><span class="line">    </span><br><span class="line">    constructor() public &#123;</span><br><span class="line">        emit Test(isContract(address(this)));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    function isContract(address _addr) public </span><br><span class="line">            returns (bool isContract)&#123;</span><br><span class="line">        uint32 size;</span><br><span class="line">        assembly &#123;</span><br><span class="line">            size :&#x3D; extcodesize(_addr)</span><br><span class="line">        &#125;</span><br><span class="line">        return (size &gt; 0);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity <span class="number">0.6</span><span class="number">.0</span>;</span><br><span class="line"></span><br><span class="line">contract TestIsContract &#123;</span><br><span class="line">    </span><br><span class="line">    event Test(bool isContract);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">constructor</span>() public &#123;</span><br><span class="line">        emit Test(isContract(address(<span class="keyword">this</span>)));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">isContract</span>(<span class="params">address _addr</span>) <span class="title">public</span> </span></span><br><span class="line"><span class="function">            <span class="title">returns</span> (<span class="params">bool isContract</span>)</span>&#123;</span><br><span class="line">        uint32 size;</span><br><span class="line">        assembly &#123;</span><br><span class="line">            size := extcodesize(_addr)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (size &gt; <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>在这个例子中，声明 Test 事件是为了记录构造函数时 isContract 函数的返回值。部署这个函数，在控制台中，可以看到 isContract 返回了 false：</p>
 <p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20200602234119.png" alt=""></p>
@@ -229,7 +235,7 @@
 <p>c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470</p>
 </blockquote>
 <p>也就是说如果这个地址是合约，那么由于其包含代码，所以它的哈希值肯定不是上述值。而且对于不存在的账户，EXTCODEHASH 会返回 0。因此，这个新的方法可以实现为：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">function isContract(address addr) internal view returns (bool) &#123;</span><br><span class="line">    &#x2F;&#x2F; 固定 EOA 的哈希值</span><br><span class="line">    bytes32 accountHash &#x3D; 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;</span><br><span class="line"></span><br><span class="line">    bytes32 codehash;</span><br><span class="line">    assembly &#123;</span><br><span class="line">        codehash :&#x3D; extcodehash(addr)</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F; 判断 codehash 是有效的账户，并且其哈希不等于 accountHash</span><br><span class="line">    return (codehash !&#x3D; 0x0 &amp;&amp; codehash !&#x3D; accountHash);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">isContract</span>(<span class="params">address addr</span>) <span class="title">internal</span> <span class="title">view</span> <span class="title">returns</span> (<span class="params">bool</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 固定 EOA 的哈希值</span></span><br><span class="line">    bytes32 accountHash = <span class="number">0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470</span>;</span><br><span class="line"></span><br><span class="line">    bytes32 codehash;</span><br><span class="line">    assembly &#123;</span><br><span class="line">        codehash := extcodehash(addr)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 判断 codehash 是有效的账户，并且其哈希不等于 accountHash</span></span><br><span class="line">    <span class="keyword">return</span> (codehash != <span class="number">0x0</span> &amp;&amp; codehash != accountHash);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>不过这个方法仍然拥有 EXTCODESIZE 方法的问题，也就是在构造函数中调用的时候，即使是合约（本合约），也会返回 accountHash 这个固定的哈希值。大家自己可以参照上面 EXTCODESIZE 的例子，写一个合约测试一下。</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>目前想要判断地址是否为合约普遍采用这两种方法。其实这两个方法没什么区别，只是后一种利用新的操作码提供了一种新的思路。</p>
@@ -337,14 +343,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-count">22</span>
           <span class="site-state-item-name">日志</span>
         </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
