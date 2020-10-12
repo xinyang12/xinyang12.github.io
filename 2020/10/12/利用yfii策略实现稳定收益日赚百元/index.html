@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/myhead.jpeg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="我们知道 yfi 和 yfii 中有好多模块，其中包括 controller, vault, strategy 等等。今天要说的就是我前段时间利用 yfii 的策略合约，在没有任何风险的情况下，每天至少赚一百块的经历，也是挺有意思的。 yfii 的具体技术细节就不说了，今天主要说下为了挣这一百块钱，如何写脚本，以及与“神秘人”斗智斗勇的故事，哈哈～">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用 YFII 策略实现稳定收益日赚百元">
+<meta property="og:url" content="http://yoursite.com/2020/10/12/%E5%88%A9%E7%94%A8yfii%E7%AD%96%E7%95%A5%E5%AE%9E%E7%8E%B0%E7%A8%B3%E5%AE%9A%E6%94%B6%E7%9B%8A%E6%97%A5%E8%B5%9A%E7%99%BE%E5%85%83/index.html">
+<meta property="og:site_name" content="PolarSpace">
+<meta property="og:description" content="我们知道 yfi 和 yfii 中有好多模块，其中包括 controller, vault, strategy 等等。今天要说的就是我前段时间利用 yfii 的策略合约，在没有任何风险的情况下，每天至少赚一百块的经历，也是挺有意思的。 yfii 的具体技术细节就不说了，今天主要说下为了挣这一百块钱，如何写脚本，以及与“神秘人”斗智斗勇的故事，哈哈～">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-10-12T13:59:07.000Z">
+<meta property="article:modified_time" content="2020-10-12T15:11:26.293Z">
+<meta property="article:author" content="PolarSpace">
+<meta property="article:tag" content="Python">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2020/10/12/%E5%88%A9%E7%94%A8yfii%E7%AD%96%E7%95%A5%E5%AE%9E%E7%8E%B0%E7%A8%B3%E5%AE%9A%E6%94%B6%E7%9B%8A%E6%97%A5%E8%B5%9A%E7%99%BE%E5%85%83/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>利用 YFII 策略实现稳定收益日赚百元 | PolarSpace</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">PolarSpace</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">极</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/10/12/%E5%88%A9%E7%94%A8yfii%E7%AD%96%E7%95%A5%E5%AE%9E%E7%8E%B0%E7%A8%B3%E5%AE%9A%E6%94%B6%E7%9B%8A%E6%97%A5%E8%B5%9A%E7%99%BE%E5%85%83/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/myhead.jpeg">
+      <meta itemprop="name" content="PolarSpace">
+      <meta itemprop="description" content="登峰造极境">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="PolarSpace">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          利用 YFII 策略实现稳定收益日赚百元
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-10-12 21:59:07 / 修改时间：23:11:26" itemprop="dateCreated datePublished" datetime="2020-10-12T21:59:07+08:00">2020-10-12</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>我们知道 yfi 和 yfii 中有好多模块，其中包括 controller, vault, strategy 等等。今天要说的就是我前段时间利用 yfii 的策略合约，在没有任何风险的情况下，每天至少赚一百块的经历，也是挺有意思的。</p>
+<p>yfii 的具体技术细节就不说了，今天主要说下为了挣这一百块钱，如何写脚本，以及与“神秘人”斗智斗勇的故事，哈哈～</p>
+<a id="more"></a>
+
+<p>前段时间，组里大哥告诉我说，yfii 的<a href="https://etherscan.io/address/0x1a6ec8eb73bf404112475895d6c8814ad5a7bd96" target="_blank" rel="noopener">某个策略</a>的 harvest() 方法，不限制调用人，并且会对调用人有一定的奖励，我看了一下源码，果然如此：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">function harvest() public &#123;</span><br><span class="line">    require(!Address.isContract(msg.sender),&quot;!contract&quot;);</span><br><span class="line">    ForReward(fortube_reward).claimReward();</span><br><span class="line">    doswap();</span><br><span class="line">    dosplit();&#x2F;&#x2F;分yfii</span><br><span class="line">    deposit();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>harvest() 方法只限制了调用者不能是合约，如果我用自己的地址去调用，那么岂不是可以白白获得一笔调用者的奖励，说干就干，立马写了一版 Python 脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">import</span> schedule</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> telegram</span><br><span class="line"><span class="keyword">from</span> uniswap <span class="keyword">import</span> Uniswap</span><br><span class="line"><span class="keyword">from</span> web3 <span class="keyword">import</span> Web3</span><br><span class="line"></span><br><span class="line">logging.basicConfig(filename=<span class="string">'money_usdt.log'</span>, filemode=<span class="string">'a'</span>, format=<span class="string">'%(asctime)s - %(message)s'</span>, level=logging.INFO)</span><br><span class="line"></span><br><span class="line">mainnet = <span class="string">'https://mainnet.infura.io/v3/infura节点'</span></span><br><span class="line"></span><br><span class="line">web3 = Web3(Web3.HTTPProvider(mainnet))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 这里分别是 for （策略挖矿收益代币）的地址，yfii 代币的地址，以及该策略合约的地址</span></span><br><span class="line">for_address = web3.toChecksumAddress(<span class="string">'0x1fcdce58959f536621d76f5b7ffb955baa5a672f'</span>)</span><br><span class="line">yfii_address = web3.toChecksumAddress(<span class="string">'0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83'</span>)</span><br><span class="line">usdt_strategy = web3.toChecksumAddress(<span class="string">'0x1a6ec8eb73bf404112475895d6c8814ad5a7bd96'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 这里的 res 变量主要是为了记录一些运行过程中的信息，并推送到我的 Telegram</span></span><br><span class="line">res = <span class="string">""</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 这个方法是为了获取到实时的 gas price 信息，调用的是 gasnow 的接口，使用了 fast_gas </span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_gas_price</span><span class="params">()</span> -&gt; float:</span></span><br><span class="line">    <span class="keyword">global</span> res</span><br><span class="line">    gas_req = requests.get(<span class="string">"https://gasnow.sparkpool.com/api/v3/gas/price?utm_source=for"</span>)</span><br><span class="line"></span><br><span class="line">    gas_json = json.loads(gas_req.content.decode(<span class="string">"utf-8"</span>))</span><br><span class="line">    rapid_gas = float(gas_json[<span class="string">'data'</span>][<span class="string">'rapid'</span>] / <span class="number">1e9</span>)</span><br><span class="line">    fast_gas = float(gas_json[<span class="string">'data'</span>][<span class="string">'fast'</span>] / <span class="number">1e9</span>)</span><br><span class="line">    standard_gas = float(gas_json[<span class="string">'data'</span>][<span class="string">'standard'</span>] / <span class="number">1e9</span>)</span><br><span class="line">    gas_price = (standard_gas + fast_gas) / <span class="number">2</span></span><br><span class="line"></span><br><span class="line">    res += <span class="string">f"Rapid gas price is <span class="subst">&#123;rapid_gas&#125;</span>\n"</span></span><br><span class="line">    res += <span class="string">f"Fast gas price is <span class="subst">&#123;fast_gas&#125;</span>\n"</span></span><br><span class="line">    res += <span class="string">f"Standard gas price is <span class="subst">&#123;standard_gas&#125;</span>\n"</span></span><br><span class="line">    res += <span class="string">f"My gas price is <span class="subst">&#123;gas_price&#125;</span>\n"</span></span><br><span class="line"></span><br><span class="line">    logging.info(<span class="string">f"Rapid gas price is <span class="subst">&#123;rapid_gas&#125;</span>"</span>)</span><br><span class="line">    logging.info(<span class="string">f"Fast gas price is <span class="subst">&#123;fast_gas&#125;</span>"</span>)</span><br><span class="line">    logging.info(<span class="string">f"Standard gas price is <span class="subst">&#123;standard_gas&#125;</span>"</span>)</span><br><span class="line">    logging.info(<span class="string">f"My gas price is <span class="subst">&#123;gas_price&#125;</span>"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> fast_gas</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 这个方法主要是为了计算我调用一次 harvest() 的成本是多少</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_cost</span><span class="params">(gas_price)</span> -&gt; float:</span></span><br><span class="line">    <span class="keyword">global</span> res</span><br><span class="line">    <span class="comment"># 先调币安的接口获取 eth 的价格，然后再乘 gas 花费</span></span><br><span class="line">    eth_price_req = requests.get(<span class="string">'https://api.binance.com/api/v1/ticker/price?symbol=ETHUSDT'</span>)</span><br><span class="line">    eth_price = float(json.loads(eth_price_req.content)[<span class="string">'price'</span>])</span><br><span class="line">    <span class="comment"># 这里 gas 花费使用了固定值 70 万，因为我观察过之前的调用，基本都是 70 万左右</span></span><br><span class="line">    cost = gas_price * <span class="number">700000</span> * eth_price / <span class="number">1e9</span></span><br><span class="line"></span><br><span class="line">    res += <span class="string">f"My cost is <span class="subst">&#123;cost&#125;</span>\n"</span></span><br><span class="line">    logging.info(<span class="string">f"My cost is <span class="subst">&#123;cost&#125;</span>"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> cost</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 这个方法的主要目的是计算当日的实际挖矿收益，并且判断挖矿收益提取合约是否有足够的收益（因为有时合约中的余额可能不足）</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_reward_balance</span><span class="params">()</span> -&gt; (float, bool):</span></span><br><span class="line">    <span class="keyword">global</span> res</span><br><span class="line">    mining_reward_abi = json.loads(<span class="string">'这里填入提取挖矿收益的地址'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 挖矿收益提取合约的地址</span></span><br><span class="line">    mining_reward_address = web3.toChecksumAddress(<span class="string">'0xF8Df2E6E46AC00Cdf3616C4E35278b7704289d82'</span>)</span><br><span class="line">    contract = web3.eth.contract(abi=mining_reward_abi, address=mining_reward_address)</span><br><span class="line">    <span class="comment"># 获取策略的收益</span></span><br><span class="line">    usdt_for_reward = contract.functions.checkBalance(usdt_strategy).call()</span><br><span class="line">    <span class="comment"># 获取提取收益合约的余额</span></span><br><span class="line">    contract_balance = contract.functions.checkRewardBalance().call()</span><br><span class="line">    <span class="comment"># 判断余额是否充足够提</span></span><br><span class="line">    enough_balance = contract_balance &gt; usdt_for_reward</span><br><span class="line"></span><br><span class="line">    res += <span class="string">f"For Token total reward is <span class="subst">&#123;usdt_for_reward&#125;</span>\n"</span></span><br><span class="line">    res += <span class="string">f"Mining Balance is <span class="subst">&#123;contract_balance / <span class="number">1e18</span>&#125;</span>\n"</span></span><br><span class="line">    res += <span class="string">f"Is balance enough? <span class="subst">&#123;enough_balance&#125;</span>\n"</span></span><br><span class="line"></span><br><span class="line">    logging.info(<span class="string">f"For Token total reward is <span class="subst">&#123;usdt_for_reward&#125;</span>"</span>)</span><br><span class="line">    logging.info(<span class="string">f"Mining Balance is <span class="subst">&#123;contract_balance / <span class="number">1e18</span>&#125;</span>"</span>)</span><br><span class="line">    logging.info(<span class="string">f"Is balance enough? <span class="subst">&#123;enough_balance&#125;</span>"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> usdt_for_reward, enough_balance</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 由于提取的 for 代币会在 uniswap 中交易为 yfii，因此，我在这里直接计算出交易后的 yfii 的价值，目的是为了判断，此次调用是否有利可图</span></span><br><span class="line"><span class="comment"># 这里使用了 Uniswap 的 Python 库，但是这个方法计算出来的价值总比实际兑换出来的价值要高个一二十刀左右，不知道为什么，没有深究</span></span><br><span class="line"><span class="comment"># 由于策略的交易路径是 for &lt;-&gt; eth &lt;-&gt; yfi，因此我这里就使用该路径计算价值</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_yfii_value</span><span class="params">(for_amount)</span>:</span></span><br><span class="line">    <span class="keyword">global</span> res</span><br><span class="line">    uni = Uniswap(address=<span class="string">''</span>,</span><br><span class="line">                  private_key=<span class="string">'PRIVATE_KEY'</span>,</span><br><span class="line">                  provider=<span class="string">'https://mainnet.infura.io/v3/infura节点'</span>,</span><br><span class="line">                  version=<span class="number">2</span>)</span><br><span class="line">    <span class="comment"># 计算获得 eth 数量</span></span><br><span class="line">    eth_amount_swapped = uni.get_token_eth_input_price(for_address, int(for_amount))</span><br><span class="line">    <span class="comment"># 计算获得的 yfii 数量</span></span><br><span class="line">    yfii_amount_swapped = uni.get_eth_token_input_price(yfii_address, eth_amount_swapped)</span><br><span class="line">    yfii_amount_to_me = yfii_amount_swapped * <span class="number">0.1</span> / <span class="number">1e18</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 调用的币安的接口获取 yfii 的价格并计算实际价值</span></span><br><span class="line">    yfii_price_req = requests.get(<span class="string">'https://api.binance.com/api/v1/ticker/price?symbol=YFIIUSDT'</span>)</span><br><span class="line">    yfii_price = float(json.loads(yfii_price_req.content)[<span class="string">'price'</span>])</span><br><span class="line"></span><br><span class="line">    yfii_value = yfii_price * yfii_amount_to_me</span><br><span class="line"></span><br><span class="line">    res += <span class="string">f"For amount to be swap is: <span class="subst">&#123;for_amount / <span class="number">1e18</span>&#125;</span>\n"</span></span><br><span class="line">    res += <span class="string">f"ETH amount swapped is: <span class="subst">&#123;eth_amount_swapped / <span class="number">1e18</span>&#125;</span>\n"</span></span><br><span class="line">    res += <span class="string">f"YFII amount swapped is: <span class="subst">&#123;yfii_amount_swapped / <span class="number">1e18</span>&#125;</span>\n"</span></span><br><span class="line">    res += <span class="string">f"YFII amount to me is: <span class="subst">&#123;yfii_amount_to_me&#125;</span>\n"</span></span><br><span class="line">    res += <span class="string">f"YFII price is: <span class="subst">&#123;yfii_price&#125;</span>\n"</span></span><br><span class="line">    res += <span class="string">f"YFII value to me is: <span class="subst">&#123;yfii_value&#125;</span>\n"</span></span><br><span class="line"></span><br><span class="line">    logging.info(<span class="string">f"For amount to be swap is: <span class="subst">&#123;for_amount / <span class="number">1e18</span>&#125;</span>"</span>)</span><br><span class="line">    logging.info(<span class="string">f"ETH amount swapped is: <span class="subst">&#123;eth_amount_swapped / <span class="number">1e18</span>&#125;</span>"</span>)</span><br><span class="line">    logging.info(<span class="string">f"YFII amount swapped is: <span class="subst">&#123;yfii_amount_swapped / <span class="number">1e18</span>&#125;</span>"</span>)</span><br><span class="line">    logging.info(<span class="string">f"YFII amount to me is: <span class="subst">&#123;yfii_amount_to_me&#125;</span>"</span>)</span><br><span class="line">    logging.info(<span class="string">f"YFII price is: <span class="subst">&#123;yfii_price&#125;</span>"</span>)</span><br><span class="line">    logging.info(<span class="string">f"YFII value to me is: <span class="subst">&#123;yfii_value&#125;</span>"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> yfii_value</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_money</span><span class="params">(gas_price)</span>:</span></span><br><span class="line">    <span class="keyword">global</span> res</span><br><span class="line">    private_key = <span class="string">'发交易的私钥'</span></span><br><span class="line"></span><br><span class="line">    account = web3.eth.account.privateKeyToAccount(private_key)</span><br><span class="line">    strategy_abi = json.loads(<span class="string">'这里填入策略合约的abi'</span>)</span><br><span class="line">    strategy_contract = web3.eth.contract(address=usdt_strategy, abi=strategy_abi)</span><br><span class="line"></span><br><span class="line">    construct_txn = strategy_contract.functions.harvest().buildTransaction(&#123;</span><br><span class="line">        <span class="string">'from'</span>: account.address,</span><br><span class="line">        <span class="string">'nonce'</span>: web3.eth.getTransactionCount(account.address),</span><br><span class="line">        <span class="string">'gas'</span>: <span class="number">1000000</span>,</span><br><span class="line">        <span class="string">'gasPrice'</span>: web3.toWei(int(gas_price), <span class="string">'gwei'</span>)&#125;)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 签名</span></span><br><span class="line">    signed = web3.eth.account.signTransaction(construct_txn, private_key)</span><br><span class="line">    res += <span class="string">f"Nonce is: <span class="subst">&#123;web3.eth.getTransactionCount(account.address)&#125;</span>\n"</span></span><br><span class="line"></span><br><span class="line">    logging.info(<span class="string">f"Nonce is: <span class="subst">&#123;web3.eth.getTransactionCount(account.address)&#125;</span>"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 推送 Telegram</span></span><br><span class="line">    notify_ending(res)</span><br><span class="line">    res = <span class="string">""</span></span><br><span class="line">    <span class="comment"># 发送交易</span></span><br><span class="line">    web3.eth.sendRawTransaction(signed.rawTransaction)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 推送 Telegram</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">notify_ending</span><span class="params">(message)</span>:</span></span><br><span class="line">    token = <span class="string">'填入自己的token'</span></span><br><span class="line">    chat_id = <span class="string">'填入自己的chat_id'</span></span><br><span class="line">    bot = telegram.Bot(token=token)</span><br><span class="line">    bot.sendMessage(chat_id=chat_id, text=message)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">global</span> res</span><br><span class="line">    logging.info(<span class="string">"--------------------NEW ROUND--------------------"</span>)</span><br><span class="line">    res += <span class="string">"--------------------NEW ROUND--------------------\n"</span></span><br><span class="line">    <span class="comment"># 获取收益情况</span></span><br><span class="line">    (usdt_for_reward, enough_balance) = get_reward_balance()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 如果收益大于 0，并且合约余额充足</span></span><br><span class="line">    <span class="keyword">if</span> usdt_for_reward &gt; <span class="number">0</span> <span class="keyword">and</span> enough_balance:</span><br><span class="line">        <span class="comment"># for -&gt; eth -&gt; yfii</span></span><br><span class="line">        <span class="comment"># 10% 会拿出来给予奖励，包括策略作者，调用者，等等</span></span><br><span class="line">        for_to_be_swap = usdt_for_reward * <span class="number">0.1</span></span><br><span class="line">        <span class="comment"># 获取挖矿兑换后的 yfii 的实际价值</span></span><br><span class="line">        yfii_value = get_yfii_value(for_to_be_swap)</span><br><span class="line">        <span class="comment"># 获取 gas price</span></span><br><span class="line">        gas_price = get_gas_price()</span><br><span class="line">        <span class="comment"># 计算实际花费</span></span><br><span class="line">        cost = my_cost(gas_price)</span><br><span class="line">        <span class="comment"># 判断是否有利可图，如果兑换的价值比成本高十美元，就调用</span></span><br><span class="line">        <span class="comment"># 这里要注意，由于上面提到过，uniswap python 库的接口计算实际的价值有点问题（也可能是我自己的使用方法不对）</span></span><br><span class="line">        <span class="comment"># 所以这里的 10 更改成 20 左右可能才能够达到收支平衡</span></span><br><span class="line">        <span class="keyword">if</span> yfii_value &gt; cost + <span class="number">10</span>:</span><br><span class="line">            <span class="comment"># 发交易调用</span></span><br><span class="line">            get_money(gas_price)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            res += <span class="string">"Too small profit\n"</span></span><br><span class="line">            logging.info(<span class="string">"Too small profit"</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="comment"># 余额不足</span></span><br><span class="line">        res += <span class="string">"Invalid reward\n"</span></span><br><span class="line">        logging.info(<span class="string">"Invalid reward"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<p>到这里，脚本就已经写完了。目前为止，还是手动触发的版本。我注意到策略的作者会在每天的早上八点左右会去调用该合约，而 fortube 的收益上链交易是在每天的凌晨12点、1点左右，开始我的想法是，早上起来早一点进行调用，只要我是第一个调用的人，我就可以获得这笔收益，而当我准备尝试的第一天，七点半起床，发现已经被调用了。没有办法，我想了半天，不能自己去触发，而是要写个定时任务，程序自己主动去调用，于是就有了第二版。</p>
+<p>其实第二版与第一版的差别并不大：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">schedule.every().day.at(<span class="string">"03:00"</span>).do(main)</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    schedule.run_pending()</span><br><span class="line">    time.sleep(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># if __name__ == "__main__":</span></span><br><span class="line"><span class="comment">#     main()</span></span><br></pre></td></tr></table></figure>
+
+<p>我只是将手动触发 main() 方法，改成了定时任务，每天三点调用，这样脚本就可以每天在半夜自动执行了。这里要注意的一点是服务器的时区问题，由于我的服务区就在东八区，所以时间直接写上 03:00 就行了。</p>
+<p>好景不长，两三天后，有人来和我抢生意了～</p>
+<p>有一天我发现我的交易总是失败，原来是有人在我之前就已经调用了。看来是不能在三点调用了，于是我将时间改为了每天一点半执行，过了几天又不行了，我发现这个“神秘人”基本上在收益刚刚上链的时候，就去调用了。于是，我只能放大招了：</p>
+<p>直接监听收益上链这笔交易的事件，一旦监听到，立马发送交易！</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 这里注意，由于使用了监听模式，所以要使用 infura 的 websocket 模式</span></span><br><span class="line">mainnet_wss = <span class="string">'wss://mainnet.infura.io/ws/v3/infura节点'</span></span><br><span class="line"></span><br><span class="line">web3 = Web3(Web3.WebsocketProvider(mainnet_wss))</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 发生事件时，调用 master() 方法，也就是上面的 main() 方法</span></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">log_loop</span><span class="params">(event_filter, poll_interval)</span>:</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="keyword">for</span> event <span class="keyword">in</span> event_filter.get_new_entries():</span><br><span class="line">            master()</span><br><span class="line">        <span class="keyword">await</span> asyncio.sleep(poll_interval)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 这里监听每个区块，是因为，infura 的节点，使用 wss 时，貌似一个小时没有推送就断开了</span></span><br><span class="line"><span class="comment"># 而收益上链的交易每天只有一次，所以 wss 会断开</span></span><br><span class="line"><span class="comment"># 因此我直接监听每个区块的产生，这样 wss 就不会断，那么脚本执行就不会出错</span></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">log_loop_for_block</span><span class="params">(block_filter, poll_interval)</span>:</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="keyword">for</span> block <span class="keyword">in</span> block_filter.get_new_entries():</span><br><span class="line">            <span class="comment"># print(block)</span></span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">        <span class="keyword">await</span> asyncio.sleep(poll_interval)</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 利用 web3py，创建 filter，监听 BatchSet 事件</span></span><br><span class="line">    batch_set_filter = mining_contract.events.BatchSet.createFilter(fromBlock=<span class="string">'latest'</span>)</span><br><span class="line">    block_filter = web3.eth.filter(<span class="string">'latest'</span>)</span><br><span class="line">    loop = asyncio.get_event_loop()</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        loop.run_until_complete(</span><br><span class="line">            asyncio.gather(</span><br><span class="line">                <span class="comment"># 监听事件</span></span><br><span class="line">                log_loop(batch_set_filter, <span class="number">2</span>),</span><br><span class="line">                <span class="comment"># 监听区块</span></span><br><span class="line">                log_loop_for_block(block_filter, <span class="number">60</span>)</span><br><span class="line">            ))</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        loop.close()</span><br></pre></td></tr></table></figure>
+
+<p>写出这种主动监听的，我想，这门生意，肯定不会被抢了。没想到，这个“神秘人”，他调用发的交易，居然比我要早确认。就比如说，12 点整收益上链，他的交易可能在 12:00:20 确认，而我的交易到了 12:00:40 才能确认上链，而这时已经没有收益了，交易就失败了。我找了找原因，发现，他的 gas price 比我设置的要高，而我当时使用的是 standard_gas，于是我果断改成了 fast_gas，可能后面还是偶尔会被提前抢到。</p>
+<p>实在没有办法，我想到，我的脚本中，调用的接口和合约之类的操作挺多，这就会使脚本的执行速度变慢，所以我的交易可能发送出去的事件就比他的晚，因此，我果断将所有的判断以及不影响主流程的接口调用都去掉。主要逻辑变成了，只要监听到交易上链，立马发送交易，也不去调用价格接口，不去判断是否收支平衡。</p>
+<p>果然，我的交易每次都能提前执行～</p>
+<p>不过，好日子总是短暂的，yfii 他们换策略合约了，直接在 harvest() 里面 require，只有策略作者才能调用，这笔稳定收入是要到头了，哈哈～</p>
+<p>但是我也八成确认这个神秘人就是 yfii 的人了～</p>
+<p>现在回想起来这件事情还挺有意思的，为了挣这每天一二十刀的收入，各种写脚本，修改脚本，也算是对自己的一个锻炼了，哈哈，有点意思～</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Python/" rel="tag"># Python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/12/%E3%80%90%E8%AF%91%E3%80%91Python%E6%A8%A1%E5%9D%97%E4%B8%8E%E5%8C%85%E4%BB%8B%E7%BB%8D/" rel="prev" title="【译】Python模块与包介绍">
+      <i class="fa fa-chevron-left"></i> 【译】Python模块与包介绍
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="PolarSpace"
+      src="/images/myhead.jpeg">
+  <p class="site-author-name" itemprop="name">PolarSpace</p>
+  <div class="site-description" itemprop="description">登峰造极境</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="gray">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">PolarSpace</span>
+</div>
+  <!--<div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
