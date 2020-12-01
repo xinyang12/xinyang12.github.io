@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/myhead.jpeg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/myhead.jpeg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="简介Chainlink VRF 是 Chainlink 公司推出的一项提供随机数的服务(RNG - random number generation)。我们知道在合约中想生成真正的随机数是不可能的。即使使用像 block.hash 这种看着肯定随机的数据也不一定随机，因为可能会被矿工操控。所以 Chainlink 开发了 VRF 这个服务来提供随机数。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Chainlink VRF 体验">
+<meta property="og:url" content="http://yoursite.com/2020/11/30/Chainlink-VRF-%E4%BD%93%E9%AA%8C/index.html">
+<meta property="og:site_name" content="PolarSpace">
+<meta property="og:description" content="简介Chainlink VRF 是 Chainlink 公司推出的一项提供随机数的服务(RNG - random number generation)。我们知道在合约中想生成真正的随机数是不可能的。即使使用像 block.hash 这种看着肯定随机的数据也不一定随机，因为可能会被矿工操控。所以 Chainlink 开发了 VRF 这个服务来提供随机数。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20201201224026.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20201201231221.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20201201231508.png">
+<meta property="article:published_time" content="2020-11-30T14:17:51.000Z">
+<meta property="article:modified_time" content="2020-12-01T15:19:18.510Z">
+<meta property="article:author" content="PolarSpace">
+<meta property="article:tag" content="Solidity">
+<meta property="article:tag" content="以太坊">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20201201224026.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/11/30/Chainlink-VRF-%E4%BD%93%E9%AA%8C/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Chainlink VRF 体验 | PolarSpace</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">PolarSpace</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">极</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/30/Chainlink-VRF-%E4%BD%93%E9%AA%8C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/myhead.jpeg">
+      <meta itemprop="name" content="PolarSpace">
+      <meta itemprop="description" content="登峰造极境">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="PolarSpace">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Chainlink VRF 体验
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-30 22:17:51" itemprop="dateCreated datePublished" datetime="2020-11-30T22:17:51+08:00">2020-11-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-12-01 23:19:18" itemprop="dateModified" datetime="2020-12-01T23:19:18+08:00">2020-12-01</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>Chainlink VRF 是 Chainlink 公司推出的一项提供随机数的服务(RNG - random number generation)。我们知道在合约中想生成真正的随机数是不可能的。即使使用像 block.hash 这种看着肯定随机的数据也不一定随机，因为可能会被矿工操控。所以 Chainlink 开发了 <a href="https://docs.chain.link/docs/chainlink-vrf" target="_blank" rel="noopener">VRF</a> 这个服务来提供随机数。</p>
+<a id="more"></a>
+
+<p>这边文章主要是说下使用 Chainlink VRF 的体验，也就是如何使用。想深入研究原理的同学可以看他们的文档～</p>
+<h3 id="具体使用"><a href="#具体使用" class="headerlink" title="具体使用"></a>具体使用</h3><p>目前 Chainlink VRF 功能只在测试网上有，Rinkeby 和 Kovan，主网还没有正式推出，但是想要使用的话可以联系他们的邮箱进行商务合作</p>
+<h4 id="申请-Link-测试币"><a href="#申请-Link-测试币" class="headerlink" title="申请 Link 测试币"></a>申请 Link 测试币</h4><p>首先，使用 VRF 是要花钱的。Chainlink 的价格服务（Price feeds）直接用就可以了，而 VRF 服务需要花费他们自己的代币 LINK。</p>
+<p>这里我们使用 Kovan 网络进行测试，<a href="https://kovan.chain.link/" target="_blank" rel="noopener">这里</a> 可以领取 LINK 测试代币</p>
+<h4 id="在-Remix-中部署"><a href="#在-Remix-中部署" class="headerlink" title="在 Remix 中部署"></a>在 Remix 中部署</h4><p>参照 <a href="https://docs.chain.link/docs/get-a-random-number" target="_blank" rel="noopener">文档</a>，将合约拷贝到 Remix 中，或者点击页面中的 <strong>Deploy this contract using Remix</strong>，进去直接就有了合约。</p>
+<p>选择 Kovan 网络之后，部署 RandomNumberConsumer 合约，然后我们拷贝合约地址，打开 MetaMask，给合约地址转点 LINK 代币。每次使用会消耗 0.1 个 LINK，所以我们转上五个十个就差不多了，不够了也能继续从水龙头领。</p>
+<h4 id="获取随机数"><a href="#获取随机数" class="headerlink" title="获取随机数"></a>获取随机数</h4><p>Demo 中给的例子，我们调用 getRandomNumber 方法，这个方法会发送请求，向 VRF 服务请求随机数，然后 VRF 服务会调用 rawFulfillRandomness 方法（这个方法在继承的 VRFConsumerBase 合约中）来将随机数传给我们的合约。</p>
+<p>部署完成后，我们调用 getRandomNumber 方法，就会发送一笔请求交易，这个方法的参数需要传一个 seed。对于 seed 的选用，可以参考<a href="https://docs.chain.link/docs/chainlink-vrf-api-reference#choosing-a-seed" target="_blank" rel="noopener">这里</a>（不过我觉得这里并没有什么有用的东西，只不过介绍了一下而已）。</p>
+<p>这里我们只是试用，那么 seed 随便传一个数就行了，然后调用 getRandomNumber 方法（记得提前给合约地址转点 LINK 币）。等到交易确认后，查看 randomResult 的值，这时可能还是 0，再等个半分钟左右，再次查看，就会发现它已经被赋值。</p>
+<p>比如我这里，seed 传 1，结果如下：</p>
+<img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20201201224026.png" width="60%" height="60%">
+
+<p>结果是一个 2^255 级别的数</p>
+<h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><p>结合代码和文档分析，重要的方法有两个：</p>
+<ol>
+<li>requestRandomness</li>
+<li>fulfillRandomness</li>
+</ol>
+<p>requestRandomness 是向 VRF 服务发送请求，而 fulfillRandomness 是需要被 VRF 回调的方法。实际在这个 Demo 中，我们调用了 getRandomNumber，它就调用了 requestRandomness 方法，而 VRF 实际上回调的是基类 VRFConsumerBase 中的 rawFulfillRandomness，它里面调用了 fulfillRandomness 方法，功能仅仅是将 randomResult 赋值为结果随机数。实际使用中，我们需要重写这个 fulfillRandomness 方法来适应我们自身的业务场景。</p>
+<p>对于 requestRandomness，我们需要传入三个参数：</p>
+<ul>
+<li>_keyHash 生成随机性所依据的公钥，不是很明白，不过每个网络都是<a href="https://docs.chain.link/docs/vrf-contracts" target="_blank" rel="noopener">各自固定的</a></li>
+<li>_fee 使用该服务需要花费的 LINK 数量，目前测试网都是 0.1</li>
+<li>_seed 前面说过，目前随便传一个就行</li>
+</ul>
+<p>每一次请求，方法都会返回一个 requestIdd。</p>
+<p>对于 fulfillRandomness 方法，会由 VRF Coordinator 来进行回调，它的两个参数：</p>
+<ul>
+<li>requestId 就是前面的返回值</li>
+<li>randomness 就是本轮生成的随机数</li>
+</ul>
+<p>总结一下，也就是说，使用 VRF 服务，实际上需要两笔交易，首先，我们需要发送请求，并花费一定的费用。然后服务方会回调我们的合约，来把随机数传过来，这也就是为什么我前面说，第一笔交易成功后，randomResult 仍然有可能是 0，需要等一会的原因。因为回调的交易还没有确认。</p>
+<h3 id="实际交易分析"><a href="#实际交易分析" class="headerlink" title="实际交易分析"></a>实际交易分析</h3><p>我们来实际看一次实际调用</p>
+<p><a href="https://kovan.etherscan.io/tx/0x16301a89ec536c694cba58f536dccf2c82539f52986a47175ef1e20bb995fa62" target="_blank" rel="noopener">发送请求</a> 与 <a href="https://kovan.etherscan.io/tx/0x31ce5b04d37b515504298030ccd4b8ccc9350f0ae779a8b336d99865282c0682" target="_blank" rel="noopener">回调</a></p>
+<p>可以看到，两笔交易的确认时间相差在 20 秒左右，回调交易实际上是由服务方调用 VRF Coordinator 合约，交易中会回调我们的合约，可以通过 <strong>Internal Txns</strong> 来确认：</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20201201231221.png" alt=""></p>
+<p>同时，也可以在 tenderly 中查看详细变量信息：</p>
+<p><img src="https://raw.githubusercontent.com/xinyang12/MyPic/master/blog_pics/img/20201201231508.png" alt=""></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>Chainlink VRF 目前只在测试网有，主网还没有正式开放，我看有一个游戏叫 PoolTogether 用的就是它的服务。</p>
+<p>整体用下来感觉，随机数挺靠谱，不过这套服务还不成熟，包括文档等都不太完善，期待 Chainlink 能把随机数这块越做越好，毕竟链上随机数现在还没有其他好的解决方案。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Solidity/" rel="tag"># Solidity</a>
+              <a href="/tags/%E4%BB%A5%E5%A4%AA%E5%9D%8A/" rel="tag"># 以太坊</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/05/Ethernaut%E9%A2%98%E8%A7%A3-King/" rel="prev" title="Ethernaut题解 - King">
+      <i class="fa fa-chevron-left"></i> Ethernaut题解 - King
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体使用"><span class="nav-text">具体使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#申请-Link-测试币"><span class="nav-text">申请 Link 测试币</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在-Remix-中部署"><span class="nav-text">在 Remix 中部署</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取随机数"><span class="nav-text">获取随机数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码分析"><span class="nav-text">代码分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实际交易分析"><span class="nav-text">实际交易分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="PolarSpace"
+      src="/images/myhead.jpeg">
+  <p class="site-author-name" itemprop="name">PolarSpace</p>
+  <div class="site-description" itemprop="description">登峰造极境</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="gray">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">PolarSpace</span>
+</div>
+  <!--<div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
